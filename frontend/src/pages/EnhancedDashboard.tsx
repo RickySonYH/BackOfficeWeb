@@ -417,7 +417,7 @@ const EnhancedDashboard: React.FC = () => {
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <h3 className="text-lg font-medium text-gray-900">{workspace.workspace_name}</h3>
-                        <p className="text-sm text-gray-500">{workspace.workspace_type?.toUpperCase() || 'UNKNOWN'}</p>
+                        <p className="text-sm text-gray-500">{(workspace.workspace_type || '').toUpperCase() || 'UNKNOWN'}</p>
                       </div>
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                         workspace.usage_patterns?.user_activity_trend === 'increasing' ? 'bg-green-100 text-green-800' :
@@ -479,7 +479,7 @@ const EnhancedDashboard: React.FC = () => {
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex items-start">
                           <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full mr-3 ${getSeverityColor(alert.severity)}`}>
-                            {alert.severity?.toUpperCase() || 'UNKNOWN'}
+                            {(alert.severity || '').toUpperCase() || 'UNKNOWN'}
                           </span>
                           <div>
                             <h3 className="text-lg font-medium text-gray-900">{alert.rule_name || 'Unknown Rule'}</h3>
@@ -547,7 +547,7 @@ const EnhancedDashboard: React.FC = () => {
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex items-start">
                           <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full mr-3 ${getPriorityColor(suggestion.priority)}`}>
-                            {suggestion.priority?.toUpperCase() || 'UNKNOWN'}
+                            {(suggestion.priority || '').toUpperCase() || 'UNKNOWN'}
                           </span>
                           <div>
                             <h3 className="text-lg font-medium text-gray-900">{suggestion.title || 'Unknown Suggestion'}</h3>
@@ -558,7 +558,7 @@ const EnhancedDashboard: React.FC = () => {
                           (suggestion.risk_level || 'unknown') === 'low' ? 'bg-green-100 text-green-800' :
                           (suggestion.risk_level || 'unknown') === 'medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
                         }`}>
-                          위험도: {suggestion.risk_level?.toUpperCase() || 'UNKNOWN'}
+                          위험도: {(suggestion.risk_level || '').toUpperCase() || 'UNKNOWN'}
                         </span>
                       </div>
                       

@@ -360,6 +360,167 @@ app.get('/api/users', authenticate, (req, res) => {
   });
 });
 
+// Data Initialization APIs
+app.get('/api/data-init/logs', authenticate, (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 100;
+  
+  const mockLogs = [
+    {
+      id: '1',
+      tenant_id: '1',
+      tenant_key: 'aicc-solutions-20231001-abc1',
+      operation_type: 'database_init',
+      status: 'completed',
+      message: 'PostgreSQL 스키마 생성 완료',
+      created_at: '2023-10-01T10:00:00.000Z',
+      updated_at: '2023-10-01T10:05:00.000Z',
+      duration_ms: 5000
+    },
+    {
+      id: '2',
+      tenant_id: '1',
+      tenant_key: 'aicc-solutions-20231001-abc1',
+      operation_type: 'data_seeding',
+      status: 'completed',
+      message: 'KMS 초기 데이터 업로드 완료 (50개 문서)',
+      created_at: '2023-10-01T10:05:00.000Z',
+      updated_at: '2023-10-01T10:10:00.000Z',
+      duration_ms: 8000
+    },
+    {
+      id: '3',
+      tenant_id: '2',
+      tenant_key: 'global-tech-20231015-def2',
+      operation_type: 'config_apply',
+      status: 'in_progress',
+      message: 'Advisor 설정 적용 중...',
+      created_at: '2023-10-15T14:00:00.000Z',
+      updated_at: '2023-10-15T14:02:00.000Z',
+      duration_ms: null
+    }
+  ];
+  
+  res.json({
+    success: true,
+    data: {
+      logs: mockLogs,
+      total: mockLogs.length,
+      page,
+      limit,
+      totalPages: Math.ceil(mockLogs.length / limit)
+    }
+  });
+});
+
+app.get('/api/data-init/tenant/:tenantId/status', authenticate, (req, res) => {
+  const { tenantId } = req.params;
+  
+  const mockStatus = {
+    tenant_id: tenantId,
+    tenant_key: tenantId === '1' ? 'aicc-solutions-20231001-abc1' : 'global-tech-20231015-def2',
+    overall_progress: {
+      completed: 2,
+      total: 3,
+      percentage: 67
+    },
+    database_status: {
+      postgresql: {
+        status: 'completed',
+        schemas_created: ['call_history', 'call_scripts', 'knowledge_base'],
+        created_at: '2023-10-01T10:00:00.000Z'
+      },
+      mongodb: {
+        status: 'completed',
+        collections_created: ['kms_documents', 'kms_categories', 'advisor_templates'],
+        created_at: '2023-10-01T10:03:00.000Z'
+      }
+    },
+    workspace_status: [
+      {
+        workspace_id: '1',
+        workspace_name: 'KMS Workspace',
+        workspace_type: 'kms',
+        data_seeding_status: 'completed',
+        config_status: 'completed',
+        files_processed: 50,
+        last_updated: '2023-10-01T10:10:00.000Z'
+      },
+      {
+        workspace_id: '2',
+        workspace_name: 'Advisor Workspace',
+        workspace_type: 'advisor',
+        data_seeding_status: 'in_progress',
+        config_status: 'pending',
+        files_processed: 15,
+        last_updated: '2023-10-01T10:15:00.000Z'
+      }
+    ],
+    last_updated: '2023-10-01T10:15:00.000Z'
+  };
+  
+  res.json({
+    success: true,
+    data: mockStatus
+  });
+});
+
+app.post('/api/data-init/tenant/:tenantId/database', authenticate, (req, res) => {
+  const { tenantId } = req.params;
+  const { database_types } = req.body;
+  
+  // Simulate initialization process
+  setTimeout(() => {
+    res.json({
+      success: true,
+      message: 'Database initialization started',
+      data: {
+        tenant_id: tenantId,
+        database_types: database_types || ['postgresql', 'mongodb'],
+        status: 'in_progress',
+        job_id: `init_${tenantId}_${Date.now()}`
+      }
+    });
+  }, 1000);
+});
+
+app.post('/api/data-init/workspace/:workspaceId/seed', authenticate, (req, res) => {
+  const { workspaceId } = req.params;
+  const { data_type, files } = req.body;
+  
+  // Simulate data seeding process
+  setTimeout(() => {
+    res.json({
+      success: true,
+      message: 'Data seeding started',
+      data: {
+        workspace_id: workspaceId,
+        data_type,
+        files_count: files?.length || 0,
+        status: 'in_progress',
+        job_id: `seed_${workspaceId}_${Date.now()}`
+      }
+    });
+  }, 1500);
+});
+
+app.post('/api/data-init/workspace/:workspaceId/config', authenticate, (req, res) => {
+  const { workspaceId } = req.params;
+  
+  // Simulate config application process
+  setTimeout(() => {
+    res.json({
+      success: true,
+      message: 'Configuration application started',
+      data: {
+        workspace_id: workspaceId,
+        status: 'in_progress',
+        job_id: `config_${workspaceId}_${Date.now()}`
+      }
+    });
+  }, 800);
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Temporary AICC Operations Platform API running on port ${PORT}`);
@@ -377,4 +538,9 @@ app.listen(PORT, () => {
   console.log('  - GET /api/monitoring/status');
   console.log('  - GET /api/monitoring/alerts');
   console.log('  - GET /api/monitoring/optimization/suggestions');
+  console.log('  - GET /api/data-init/logs');
+  console.log('  - GET /api/data-init/tenant/:tenantId/status');
+  console.log('  - POST /api/data-init/tenant/:tenantId/database');
+  console.log('  - POST /api/data-init/workspace/:workspaceId/seed');
+  console.log('  - POST /api/data-init/workspace/:workspaceId/config');
 });
