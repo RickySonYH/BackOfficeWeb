@@ -1,0 +1,186 @@
+# [advice from AI] AICC Operations Platform Ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: aicc-ops-ingress
+  namespace: aicc-ops-platform
+  labels:
+    app: aicc-operations
+    component: ingress
+  annotations:
+    # Nginx Ingress Controller annotations
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    
+    # CORS settings
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://ops.aicc.co.kr"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Content-Type, Authorization, X-Requested-With"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    
+    # Rate limiting
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    nginx.ingress.kubernetes.io/rate-limit-connections: "10"
+    
+    # Security headers
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      add_header X-Frame-Options "DENY" always;
+      add_header X-Content-Type-Options "nosniff" always;
+      add_header X-XSS-Protection "1; mode=block" always;
+      add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+      add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.ops.aicc.co.kr;" always;
+    
+    # Client body size for file uploads
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    
+    # Timeouts
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    
+    # Buffering for large responses
+    nginx.ingress.kubernetes.io/proxy-buffering: "on"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "8k"
+    
+    # Certificate management (cert-manager)
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    cert-manager.io/acme-challenge-type: "http01"
+    
+    # Additional annotations for cloud providers
+    # AWS ALB
+    # kubernetes.io/ingress.class: "alb"
+    # alb.ingress.kubernetes.io/scheme: internet-facing
+    # alb.ingress.kubernetes.io/target-type: ip
+    
+    # GCP GCE
+    # kubernetes.io/ingress.class: "gce"
+    # cloud.google.com/neg: '{"ingress": true}'
+spec:
+  tls:
+  - hosts:
+    - ops.aicc.co.kr
+    - api.ops.aicc.co.kr
+    secretName: aicc-ops-tls
+  
+  rules:
+  # Frontend rules
+  - host: ops.aicc.co.kr
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: aicc-ops-frontend-service
+            port:
+              number: 6001
+      
+      # API proxy to backend
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: aicc-ops-backend-service
+            port:
+              number: 6000
+  
+  # API-only domain (선택사항)
+  - host: api.ops.aicc.co.kr
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: aicc-ops-backend-service
+            port:
+              number: 6000
+
+---
+# Ingress for development/staging environment
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: aicc-ops-ingress-dev
+  namespace: aicc-ops-platform
+  labels:
+    app: aicc-operations
+    component: ingress
+    environment: development
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+spec:
+  rules:
+  # Development access
+  - host: dev.ops.aicc.co.kr
+    http:
+      paths:
+      - path: /frontend(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: aicc-ops-frontend-service
+            port:
+              number: 6001
+      - path: /api(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: aicc-ops-backend-service
+            port:
+              number: 6000
+
+---
+# Network Policy for Ingress traffic
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: aicc-ops-ingress-netpol
+  namespace: aicc-ops-platform
+spec:
+  podSelector:
+    matchLabels:
+      app: aicc-operations
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: TCP
+      port: 6000
+    - protocol: TCP
+      port: 6001
+  egress:
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: aicc-ops-platform
+    ports:
+    - protocol: TCP
+      port: 5432  # PostgreSQL
+    - protocol: TCP
+      port: 6379  # Redis

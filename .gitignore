@@ -1,0 +1,80 @@
+# [advice from AI] Git 제외 파일 목록
+
+# 환경 변수 파일
+.env
+.env.local
+.env.development
+.env.production
+
+# 로그 파일
+logs/
+*.log
+
+# 의존성 모듈
+node_modules/
+*/node_modules/
+
+# 빌드 결과물
+dist/
+build/
+*/dist/
+*/build/
+
+# 임시 파일
+temp/
+tmp/
+uploads/
+*.tmp
+
+# IDE 설정 파일
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS 생성 파일
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Docker 관련
+.dockerignore
+
+# 테스트 커버리지
+coverage/
+*.lcov
+
+# TypeScript 빌드 정보
+*.tsbuildinfo
+
+# 런타임 데이터
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# 디버그 로그
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ESLint 캐시
+.eslintcache
+
+# PostgreSQL 데이터
+postgres_data/
+
+# Kubernetes 설정 (민감한 정보 포함 가능)
+kubeconfig
+*.kubeconfig
+
+# 암호화 키 파일
+*.key
+*.pem
+*.crt
+

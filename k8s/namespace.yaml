@@ -1,0 +1,66 @@
+# [advice from AI] AICC Operations Platform Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aicc-ops-platform
+  labels:
+    name: aicc-ops-platform
+    app: aicc-operations
+    version: v1.0.0
+    environment: production
+  annotations:
+    description: "AICC Operations Management Platform - 콜봇/콜센터 솔루션 통합 운영 관리"
+    contact: "support@aicc.co.kr"
+    created-by: "aicc-ops-deployment"
+---
+# ResourceQuota for namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: aicc-ops-quota
+  namespace: aicc-ops-platform
+spec:
+  hard:
+    # Compute resources
+    requests.cpu: "4"
+    requests.memory: 8Gi
+    limits.cpu: "8"
+    limits.memory: 16Gi
+    
+    # Storage
+    requests.storage: 100Gi
+    persistentvolumeclaims: "10"
+    
+    # Objects
+    pods: "20"
+    services: "10"
+    secrets: "20"
+    configmaps: "20"
+    deployments.apps: "10"
+    
+    # Network
+    services.loadbalancers: "2"
+    services.nodeports: "5"
+---
+# LimitRange for default resource limits
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: aicc-ops-limits
+  namespace: aicc-ops-platform
+spec:
+  limits:
+  - default:
+      cpu: 500m
+      memory: 512Mi
+    defaultRequest:
+      cpu: 100m
+      memory: 128Mi
+    type: Container
+  - max:
+      cpu: "2"
+      memory: 4Gi
+    min:
+      cpu: 50m
+      memory: 64Mi
+    type: Container

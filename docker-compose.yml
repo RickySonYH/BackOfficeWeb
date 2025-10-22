@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 데이터베이스 (관리 솔루션 메타 DB 전용)
+  postgres:
+    image: postgres:15-alpine
+    container_name: aicc-ops-postgres
+    environment:
+      POSTGRES_DB: aicc_ops
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    ports:
+      - "6432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+    networks:
+      - aicc-network
+    restart: unless-stopped
+
+  # Backend API 서버 (Node.js + Express + TypeScript)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aicc-ops-backend
+    environment:
+      NODE_ENV: development
+      PORT: 6000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: aicc_ops
+      DB_USER: postgres
+      DB_PASSWORD: postgres123
+      AUTH_PROVIDER: internal
+      INTERNAL_AUTH_ENABLED: 'true'
+      ECP_AUTH_ENABLED: 'false'
+      JWT_SECRET: your_jwt_secret_key_for_development
+      JWT_EXPIRES_IN: 1h
+      REFRESH_TOKEN_SECRET: your_refresh_token_secret_key_for_development
+      REFRESH_TOKEN_EXPIRES_IN: 7d
+    ports:
+      - "6000:6000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      - postgres
+    networks:
+      - aicc-network
+    restart: unless-stopped
+    command: npm run dev
+
+  # Frontend 웹 애플리케이션 (React + TypeScript + Vite)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: aicc-ops-frontend
+    environment:
+      VITE_API_BASE_URL: http://localhost:6000
+      VITE_PORT: 6001
+    ports:
+      - "6001:6001"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - aicc-network
+    restart: unless-stopped
+    command: npm run dev
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  aicc-network:
+    driver: bridge

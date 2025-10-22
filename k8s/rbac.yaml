@@ -1,0 +1,254 @@
+# [advice from AI] AICC Operations Platform RBAC Configuration
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: aicc-ops-service-account
+  namespace: aicc-ops-platform
+  labels:
+    app: aicc-operations
+    component: rbac
+  annotations:
+    description: "Service account for AICC Operations Platform"
+automountServiceAccountToken: true
+
+---
+# Role for namespace management
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: aicc-ops-platform
+  name: aicc-ops-namespace-manager
+  labels:
+    app: aicc-operations
+    component: rbac
+rules:
+# Pod management
+- apiGroups: [""]
+  resources: ["pods", "pods/log", "pods/status"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+# Service management
+- apiGroups: [""]
+  resources: ["services", "services/status"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+# ConfigMap and Secret management
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+# PersistentVolume management
+- apiGroups: [""]
+  resources: ["persistentvolumeclaims", "persistentvolumes"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+# Event management
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["get", "list", "watch", "create"]
+
+# Deployment management
+- apiGroups: ["apps"]
+  resources: ["deployments", "deployments/status", "deployments/scale"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+# ReplicaSet management
+- apiGroups: ["apps"]
+  resources: ["replicasets", "replicasets/status"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+# StatefulSet management (if needed)
+- apiGroups: ["apps"]
+  resources: ["statefulsets", "statefulsets/status", "statefulsets/scale"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+# Ingress management
+- apiGroups: ["networking.k8s.io"]
+  resources: ["ingresses", "ingresses/status"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+# NetworkPolicy management
+- apiGroups: ["networking.k8s.io"]
+  resources: ["networkpolicies"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+# HorizontalPodAutoscaler management
+- apiGroups: ["autoscaling"]
+  resources: ["horizontalpodautoscalers", "horizontalpodautoscalers/status"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+# PodDisruptionBudget management
+- apiGroups: ["policy"]
+  resources: ["poddisruptionbudgets", "poddisruptionbudgets/status"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+# Job and CronJob management (for data initialization tasks)
+- apiGroups: ["batch"]
+  resources: ["jobs", "jobs/status", "cronjobs", "cronjobs/status"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+---
+# RoleBinding to connect ServiceAccount with Role
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: aicc-ops-namespace-manager-binding
+  namespace: aicc-ops-platform
+  labels:
+    app: aicc-operations
+    component: rbac
+subjects:
+- kind: ServiceAccount
+  name: aicc-ops-service-account
+  namespace: aicc-ops-platform
+roleRef:
+  kind: Role
+  name: aicc-ops-namespace-manager
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# ClusterRole for cross-namespace operations (if needed)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: aicc-ops-cluster-reader
+  labels:
+    app: aicc-operations
+    component: rbac
+rules:
+# Node information (for monitoring)
+- apiGroups: [""]
+  resources: ["nodes", "nodes/status"]
+  verbs: ["get", "list", "watch"]
+
+# Namespace information
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["get", "list", "watch"]
+
+# StorageClass information
+- apiGroups: ["storage.k8s.io"]
+  resources: ["storageclasses"]
+  verbs: ["get", "list", "watch"]
+
+# Metrics (for monitoring)
+- apiGroups: ["metrics.k8s.io"]
+  resources: ["nodes", "pods"]
+  verbs: ["get", "list"]
+
+# Custom Resource Definitions (if using operators)
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["get", "list", "watch"]
+
+---
+# ClusterRoleBinding for cluster-level permissions
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: aicc-ops-cluster-reader-binding
+  labels:
+    app: aicc-operations
+    component: rbac
+subjects:
+- kind: ServiceAccount
+  name: aicc-ops-service-account
+  namespace: aicc-ops-platform
+roleRef:
+  kind: ClusterRole
+  name: aicc-ops-cluster-reader
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# Additional Role for tenant namespace management
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: aicc-ops-tenant-manager
+  labels:
+    app: aicc-operations
+    component: rbac
+rules:
+# Tenant namespace creation and management
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+# ResourceQuota management for tenant namespaces
+- apiGroups: [""]
+  resources: ["resourcequotas"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+# LimitRange management for tenant namespaces
+- apiGroups: [""]
+  resources: ["limitranges"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+# ServiceAccount management in tenant namespaces
+- apiGroups: [""]
+  resources: ["serviceaccounts"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+# RBAC management in tenant namespaces
+- apiGroups: ["rbac.authorization.k8s.io"]
+  resources: ["roles", "rolebindings"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+---
+# ClusterRoleBinding for tenant management
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: aicc-ops-tenant-manager-binding
+  labels:
+    app: aicc-operations
+    component: rbac
+subjects:
+- kind: ServiceAccount
+  name: aicc-ops-service-account
+  namespace: aicc-ops-platform
+roleRef:
+  kind: ClusterRole
+  name: aicc-ops-tenant-manager
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# Security context constraints (OpenShift)
+# apiVersion: security.openshift.io/v1
+# kind: SecurityContextConstraints
+# metadata:
+#   name: aicc-ops-scc
+#   labels:
+#     app: aicc-operations
+#     component: rbac
+# allowHostDirVolumePlugin: false
+# allowHostIPC: false
+# allowHostNetwork: false
+# allowHostPID: false
+# allowHostPorts: false
+# allowPrivilegedContainer: false
+# allowedCapabilities: null
+# defaultAddCapabilities: null
+# fsGroup:
+#   type: RunAsAny
+# readOnlyRootFilesystem: false
+# requiredDropCapabilities:
+# - KILL
+# - MKNOD
+# - SETUID
+# - SETGID
+# runAsUser:
+#   type: MustRunAsNonRoot
+# seLinuxContext:
+#   type: MustRunAs
+# supplementalGroups:
+#   type: RunAsAny
+# users:
+# - system:serviceaccount:aicc-ops-platform:aicc-ops-service-account
+# volumes:
+# - configMap
+# - downwardAPI
+# - emptyDir
+# - persistentVolumeClaim
+# - projected
+# - secret

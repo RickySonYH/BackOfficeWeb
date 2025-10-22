@@ -1,0 +1,119 @@
+# [advice from AI] AICC Operations Platform Frontend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: aicc-ops-frontend-service
+  namespace: aicc-ops-platform
+  labels:
+    app: aicc-operations
+    component: frontend
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "6001"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 6001
+    targetPort: 6001
+    protocol: TCP
+  selector:
+    app: aicc-operations
+    component: frontend
+  sessionAffinity: None
+
+---
+# Frontend Service (NodePort for external access if needed)
+apiVersion: v1
+kind: Service
+metadata:
+  name: aicc-ops-frontend-nodeport
+  namespace: aicc-ops-platform
+  labels:
+    app: aicc-operations
+    component: frontend
+    service-type: nodeport
+spec:
+  type: NodePort
+  ports:
+  - name: http
+    port: 6001
+    targetPort: 6001
+    nodePort: 30601  # 30000-32767 범위 내
+    protocol: TCP
+  selector:
+    app: aicc-operations
+    component: frontend
+  sessionAffinity: None
+
+---
+# Frontend Service (LoadBalancer for cloud environments)
+apiVersion: v1
+kind: Service
+metadata:
+  name: aicc-ops-frontend-lb
+  namespace: aicc-ops-platform
+  labels:
+    app: aicc-operations
+    component: frontend
+    service-type: loadbalancer
+  annotations:
+    # AWS Load Balancer annotations
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "tcp"
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:region:account:certificate/cert-id"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
+    
+    # GCP Load Balancer annotations
+    cloud.google.com/neg: '{"ingress": true}'
+    cloud.google.com/backend-config: '{"default": "aicc-ops-frontend-config"}'
+    
+    # Azure Load Balancer annotations
+    service.beta.kubernetes.io/azure-load-balancer-internal: "false"
+    
+    # Nginx specific annotations
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 80
+    targetPort: 6001
+    protocol: TCP
+  - name: https
+    port: 443
+    targetPort: 6001
+    protocol: TCP
+  selector:
+    app: aicc-operations
+    component: frontend
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800  # 3 hours
+
+---
+# Backend Configuration for GCP (if using GCP)
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: aicc-ops-frontend-config
+  namespace: aicc-ops-platform
+spec:
+  timeoutSec: 30
+  connectionDraining:
+    drainingTimeoutSec: 60
+  healthCheck:
+    checkIntervalSec: 10
+    timeoutSec: 5
+    healthyThreshold: 1
+    unhealthyThreshold: 3
+    type: HTTP
+    requestPath: /health
+    port: 6001
+  sessionAffinity:
+    affinityType: "CLIENT_IP"
+    affinityCookieTtlSec: 50

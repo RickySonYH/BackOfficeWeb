@@ -1,0 +1,235 @@
+# [advice from AI] AICC Operations Platform Backend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aicc-ops-backend
+  namespace: aicc-ops-platform
+  labels:
+    app: aicc-operations
+    component: backend
+    version: v1.0.0
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: aicc-operations
+      component: backend
+  template:
+    metadata:
+      labels:
+        app: aicc-operations
+        component: backend
+        version: v1.0.0
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "6000"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: aicc-ops-service-account
+      
+      # Security context
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+      
+      # Image pull secrets (private registry 사용 시)
+      imagePullSecrets:
+      - name: aicc-ops-registry
+      
+      containers:
+      - name: backend
+        image: aicc/ops-backend:latest  # 실제 이미지 경로로 교체
+        imagePullPolicy: Always
+        
+        ports:
+        - name: http
+          containerPort: 6000
+          protocol: TCP
+        
+        # Environment variables from ConfigMap
+        envFrom:
+        - configMapRef:
+            name: aicc-ops-config
+        
+        # Environment variables from Secrets
+        env:
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: aicc-ops-secrets
+              key: jwt-secret
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: aicc-ops-secrets
+              key: db-password
+        - name: ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: aicc-ops-secrets
+              key: encryption-key
+        - name: ECP_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: aicc-ops-secrets
+              key: ecp-client-secret
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: aicc-ops-secrets
+              key: redis-password
+        
+        # Resource limits and requests
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+        
+        # Health checks
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 6000
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+        
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 6000
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+          successThreshold: 1
+        
+        # Startup probe (for slow startup)
+        startupProbe:
+          httpGet:
+            path: /api/health
+            port: 6000
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30
+          successThreshold: 1
+        
+        # Volume mounts
+        volumeMounts:
+        - name: logs
+          mountPath: /app/logs
+        - name: uploads
+          mountPath: /app/uploads
+        - name: tmp
+          mountPath: /tmp
+        
+        # Security context for container
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false  # Node.js 앱은 일부 쓰기 필요
+          capabilities:
+            drop:
+            - ALL
+            add:
+            - NET_BIND_SERVICE
+      
+      # Volumes
+      volumes:
+      - name: logs
+        persistentVolumeClaim:
+          claimName: aicc-ops-logs-pvc
+      - name: uploads
+        persistentVolumeClaim:
+          claimName: aicc-ops-uploads-pvc
+      - name: tmp
+        emptyDir: {}
+      
+      # Pod disruption budget를 위한 준비
+      terminationGracePeriodSeconds: 30
+      
+      # Node selection (선택사항)
+      nodeSelector:
+        kubernetes.io/os: linux
+      
+      # Tolerations (필요시)
+      tolerations: []
+      
+      # Affinity rules
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: component
+                  operator: In
+                  values:
+                  - backend
+              topologyKey: kubernetes.io/hostname
+
+---
+# PersistentVolumeClaim for logs
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: aicc-ops-logs-pvc
+  namespace: aicc-ops-platform
+  labels:
+    app: aicc-operations
+    component: backend
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard  # 클러스터에 맞게 조정
+
+---
+# PersistentVolumeClaim for uploads
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: aicc-ops-uploads-pvc
+  namespace: aicc-ops-platform
+  labels:
+    app: aicc-operations
+    component: backend
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: standard  # 클러스터에 맞게 조정
+
+---
+# Pod Disruption Budget
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: aicc-ops-backend-pdb
+  namespace: aicc-ops-platform
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: aicc-operations
+      component: backend
