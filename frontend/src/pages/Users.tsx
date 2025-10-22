@@ -62,8 +62,7 @@ const Users: React.FC = () => {
   }, []);
 
   // 테넌트 필터 변경
-  const handleTenantFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const tenantId = e.target.value;
+  const handleTenantFilterChange = (tenantId: string) => {
     setSelectedTenantId(tenantId);
     loadUsers(tenantId || undefined);
   };
