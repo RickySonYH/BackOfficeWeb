@@ -27,7 +27,7 @@ import monitoringRoutes from './routes/monitoring';
 dotenv.config();
 
 const app = express();
-const PORT = parseInt(process.env.PORT || '6000');
+const PORT = parseInt(process.env.PORT || '3001');
 
 // [advice from AI] 보안 미들웨어 설정
 app.use(helmet());

@@ -56,23 +56,19 @@ export const monitoringService = {
    * 실시간 메트릭 조회
    */
   async getRealTimeMetrics(): Promise<MonitoringApiResponse<RealTimeMetrics>> {
-    // 개발 중에는 Mock 데이터 우선 사용
-    if (import.meta.env.VITE_ENABLE_MOCK_DATA !== 'false') {
-      return {
-        success: true,
-        data: this.getMockRealTimeMetrics()
-      };
-    }
-    
     try {
       const response = await monitoringApi.get('/api/monitoring/realtime');
       return response.data;
     } catch (error: any) {
-      console.warn('Real-time metrics API not available, using mock data:', error.message);
-      return {
-        success: true,
-        data: this.getMockRealTimeMetrics()
-      };
+      console.warn('Real-time metrics API not available:', error.message);
+      // 프로덕션에서는 Mock 데이터를 최소한으로만 사용
+      if (import.meta.env.VITE_ENABLE_MOCK_DATA === 'true') {
+        return {
+          success: true,
+          data: this.getMockRealTimeMetrics()
+        };
+      }
+      throw error;
     }
   },
 
@@ -80,23 +76,19 @@ export const monitoringService = {
    * 시스템 상태 요약 조회
    */
   async getSystemStatus(): Promise<MonitoringApiResponse<SystemStatus>> {
-    // 개발 중에는 Mock 데이터 우선 사용
-    if (import.meta.env.VITE_ENABLE_MOCK_DATA !== 'false') {
-      return {
-        success: true,
-        data: this.getMockSystemStatus()
-      };
-    }
-    
     try {
       const response = await monitoringApi.get('/api/monitoring/status');
       return response.data;
     } catch (error: any) {
-      console.warn('System status API not available, using mock data:', error.message);
-      return {
-        success: true,
-        data: this.getMockSystemStatus()
-      };
+      console.warn('System status API not available:', error.message);
+      // 프로덕션에서는 Mock 데이터를 최소한으로만 사용
+      if (import.meta.env.VITE_ENABLE_MOCK_DATA === 'true') {
+        return {
+          success: true,
+          data: this.getMockSystemStatus()
+        };
+      }
+      throw error;
     }
   },
 

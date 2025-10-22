@@ -1,7 +1,7 @@
 // [advice from AI] 데이터 초기화 전용 API 서비스 (포트 6000)
 import axios from 'axios';
 
-const DATA_INIT_API_BASE_URL = 'http://localhost:2000';
+const DATA_INIT_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
 const dataInitApi = axios.create({
   baseURL: DATA_INIT_API_BASE_URL,

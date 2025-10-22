@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { DashboardResponse, SystemStatus } from '../types/dashboard';
 
-const DASHBOARD_API_BASE_URL = 'http://localhost:2000';
+const DASHBOARD_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
 const dashboardApi = axios.create({
   baseURL: DASHBOARD_API_BASE_URL,
@@ -41,44 +41,39 @@ dashboardApi.interceptors.response.use(
 export const dashboardService = {
   // 전체 대시보드 데이터 조회
   async getDashboardData(): Promise<DashboardResponse> {
-    // 개발 중에는 Mock 데이터 우선 사용
-    if (import.meta.env.VITE_ENABLE_MOCK_DATA !== 'false') {
-      return {
-        success: true,
-        data: this.getMockDashboardData()
-      };
-    }
-    
     try {
       const response = await dashboardApi.get('/api/dashboard');
       return { success: true, data: response.data.data };
     } catch (error: any) {
-      console.warn('Dashboard API not available, using mock data:', error.message);
-      return {
-        success: true,
-        data: this.getMockDashboardData()
-      };
+      console.warn('Dashboard API not available, using mock data as fallback:', error.message);
+      // 프로덕션에서는 Mock 데이터를 최소한으로만 사용
+      if (import.meta.env.VITE_ENABLE_MOCK_DATA === 'true') {
+        return {
+          success: true,
+          data: this.getMockDashboardData()
+        };
+      }
+      throw new Error('Dashboard API unavailable and mock data disabled');
     }
   },
 
   // 시스템 상태만 조회 (실시간 업데이트용)
   async getSystemStatus(): Promise<{ success: boolean; data?: SystemStatus; error?: string }> {
-    // 개발 중에는 Mock 데이터 우선 사용
-    if (import.meta.env.VITE_ENABLE_MOCK_DATA !== 'false') {
-      return {
-        success: true,
-        data: this.getMockSystemStatus()
-      };
-    }
-    
     try {
       const response = await dashboardApi.get('/api/dashboard/system-status');
       return { success: true, data: response.data.data };
     } catch (error: any) {
-      console.warn('System status API not available, using mock data:', error.message);
+      console.warn('System status API not available:', error.message);
+      // 프로덕션에서는 Mock 데이터를 최소한으로만 사용
+      if (import.meta.env.VITE_ENABLE_MOCK_DATA === 'true') {
+        return {
+          success: true,
+          data: this.getMockSystemStatus()
+        };
+      }
       return {
-        success: true,
-        data: this.getMockSystemStatus()
+        success: false,
+        error: 'System status API unavailable'
       };
     }
   },
