@@ -363,35 +363,35 @@ const EnhancedDashboard: React.FC = () => {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {tenant.metrics.active_users}
+                            {tenant.metrics?.active_users || '0'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{tenant.resource_usage.cpu_percent.toFixed(1)}%</div>
+                            <div className="text-sm text-gray-900">{tenant.resource_usage?.cpu_percent?.toFixed(1) || '0'}%</div>
                             <div className="w-full bg-gray-200 rounded-full h-2">
                               <div 
                                 className={`h-2 rounded-full ${
-                                  tenant.resource_usage.cpu_percent > 80 ? 'bg-red-600' :
-                                  tenant.resource_usage.cpu_percent > 60 ? 'bg-yellow-600' : 'bg-green-600'
+                                  (tenant.resource_usage?.cpu_percent || 0) > 80 ? 'bg-red-600' :
+                                  (tenant.resource_usage?.cpu_percent || 0) > 60 ? 'bg-yellow-600' : 'bg-green-600'
                                 }`}
-                                style={{ width: `${Math.min(tenant.resource_usage.cpu_percent, 100)}%` }}
+                                style={{ width: `${Math.min(tenant.resource_usage?.cpu_percent || 0, 100)}%` }}
                               ></div>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{tenant.resource_usage.memory_mb.toFixed(0)}MB</div>
+                            <div className="text-sm text-gray-900">{tenant.resource_usage?.memory_mb?.toFixed(0) || '0'}MB</div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{tenant.resource_usage.storage_gb.toFixed(1)}GB</div>
+                            <div className="text-sm text-gray-900">{tenant.resource_usage?.storage_gb?.toFixed(1) || '0'}GB</div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{tenant.performance.avg_response_time.toFixed(0)}ms</div>
+                            <div className="text-sm text-gray-900">{tenant.performance?.avg_response_time?.toFixed(0) || '0'}ms</div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              tenant.performance.uptime_percent > 99 ? 'bg-green-100 text-green-800' :
-                              tenant.performance.uptime_percent > 95 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
+                              (tenant.performance?.uptime_percent || 0) > 99 ? 'bg-green-100 text-green-800' :
+                              (tenant.performance?.uptime_percent || 0) > 95 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
                             }`}>
-                              {tenant.performance.uptime_percent.toFixed(1)}%
+                              {tenant.performance?.uptime_percent?.toFixed(1) || '0'}%
                             </span>
                           </td>
                         </tr>
@@ -417,37 +417,37 @@ const EnhancedDashboard: React.FC = () => {
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <h3 className="text-lg font-medium text-gray-900">{workspace.workspace_name}</h3>
-                        <p className="text-sm text-gray-500">{workspace.workspace_type.toUpperCase()}</p>
+                        <p className="text-sm text-gray-500">{workspace.workspace_type?.toUpperCase() || 'UNKNOWN'}</p>
                       </div>
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        workspace.usage_patterns.user_activity_trend === 'increasing' ? 'bg-green-100 text-green-800' :
-                        workspace.usage_patterns.user_activity_trend === 'stable' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                        workspace.usage_patterns?.user_activity_trend === 'increasing' ? 'bg-green-100 text-green-800' :
+                        workspace.usage_patterns?.user_activity_trend === 'stable' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                       }`}>
-                        {workspace.usage_patterns.user_activity_trend === 'increasing' ? '증가' :
-                         workspace.usage_patterns.user_activity_trend === 'stable' ? '안정' : '감소'}
+                        {workspace.usage_patterns?.user_activity_trend === 'increasing' ? '증가' :
+                         workspace.usage_patterns?.user_activity_trend === 'stable' ? '안정' : '감소'}
                       </span>
                     </div>
                     
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">활성 세션</span>
-                        <span className="font-semibold">{workspace.metrics.active_sessions}</span>
+                        <span className="font-semibold">{workspace.metrics?.active_sessions || '0'}</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">처리된 문서</span>
-                        <span className="font-semibold">{workspace.metrics.documents_processed}</span>
+                        <span className="font-semibold">{workspace.metrics?.documents_processed || '0'}</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">쿼리 응답시간</span>
-                        <span className="font-semibold">{workspace.performance.query_response_time.toFixed(0)}ms</span>
+                        <span className="font-semibold">{workspace.performance?.query_response_time?.toFixed(0) || '0'}ms</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">검색 정확도</span>
-                        <span className="font-semibold">{workspace.performance.search_accuracy.toFixed(1)}%</span>
+                        <span className="font-semibold">{workspace.performance?.search_accuracy?.toFixed(1) || '0'}%</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600">사용자 만족도</span>
-                        <span className="font-semibold">{workspace.performance.user_satisfaction.toFixed(1)}%</span>
+                        <span className="font-semibold">{workspace.performance?.user_satisfaction?.toFixed(1) || '0'}%</span>
                       </div>
                     </div>
                   </div>
@@ -479,23 +479,23 @@ const EnhancedDashboard: React.FC = () => {
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex items-start">
                           <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full mr-3 ${getSeverityColor(alert.severity)}`}>
-                            {alert.severity.toUpperCase()}
+                            {alert.severity?.toUpperCase() || 'UNKNOWN'}
                           </span>
                           <div>
-                            <h3 className="text-lg font-medium text-gray-900">{alert.rule_name}</h3>
-                            <p className="text-gray-600 mt-1">{alert.message}</p>
+                            <h3 className="text-lg font-medium text-gray-900">{alert.rule_name || 'Unknown Rule'}</h3>
+                            <p className="text-gray-600 mt-1">{alert.message || 'No message available'}</p>
                           </div>
                         </div>
                         <div className="text-sm text-gray-500">
-                          {new Date(alert.triggered_at).toLocaleString('ko-KR')}
+                          {alert.triggered_at ? new Date(alert.triggered_at).toLocaleString('ko-KR') : 'Unknown time'}
                         </div>
                       </div>
                       
-                      {alert.details && (
+                      {alert.details && Object.keys(alert.details).length > 0 && (
                         <div className="bg-gray-50 p-4 rounded-lg">
                           <h4 className="font-medium text-gray-900 mb-2">세부 정보</h4>
                           <div className="space-y-1 text-sm">
-                            {Object.entries(alert.details).map(([key, value]) => (
+                            {Object.entries(alert.details || {}).map(([key, value]) => (
                               <div key={key} className="flex justify-between">
                                 <span className="text-gray-600">{key}:</span>
                                 <span className="font-medium">{String(value)}</span>
@@ -547,36 +547,36 @@ const EnhancedDashboard: React.FC = () => {
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex items-start">
                           <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full mr-3 ${getPriorityColor(suggestion.priority)}`}>
-                            {suggestion.priority.toUpperCase()}
+                            {suggestion.priority?.toUpperCase() || 'UNKNOWN'}
                           </span>
                           <div>
-                            <h3 className="text-lg font-medium text-gray-900">{suggestion.title}</h3>
-                            <p className="text-gray-600 mt-1">{suggestion.description}</p>
+                            <h3 className="text-lg font-medium text-gray-900">{suggestion.title || 'Unknown Suggestion'}</h3>
+                            <p className="text-gray-600 mt-1">{suggestion.description || 'No description available'}</p>
                           </div>
                         </div>
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          suggestion.risk_level === 'low' ? 'bg-green-100 text-green-800' :
-                          suggestion.risk_level === 'medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
+                          (suggestion.risk_level || 'unknown') === 'low' ? 'bg-green-100 text-green-800' :
+                          (suggestion.risk_level || 'unknown') === 'medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
                         }`}>
-                          위험도: {suggestion.risk_level.toUpperCase()}
+                          위험도: {suggestion.risk_level?.toUpperCase() || 'UNKNOWN'}
                         </span>
                       </div>
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
                         <div>
                           <h4 className="font-medium text-gray-900 mb-2">현재 영향</h4>
-                          <p className="text-sm text-gray-600">{suggestion.current_impact}</p>
+                          <p className="text-sm text-gray-600">{suggestion.current_impact || 'No impact information'}</p>
                         </div>
                         <div>
                           <h4 className="font-medium text-gray-900 mb-2">예상 개선 효과</h4>
-                          <p className="text-sm text-gray-600">{suggestion.potential_improvement}</p>
+                          <p className="text-sm text-gray-600">{suggestion.potential_improvement || 'No improvement information'}</p>
                         </div>
                       </div>
                       
                       <div className="mb-4">
                         <h4 className="font-medium text-gray-900 mb-2">구현 단계</h4>
                         <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600">
-                          {suggestion.implementation_steps.map((step, index) => (
+                          {(suggestion.implementation_steps || []).map((step, index) => (
                             <li key={index}>{step}</li>
                           ))}
                         </ol>
