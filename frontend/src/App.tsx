@@ -24,7 +24,7 @@ function App() {
   return (
     <AuthProvider>
       <ECPAuthProvider>
-        <Router>
+        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           {/* 로그인 페이지 */}
           <Route path="/login" element={<Login />} />

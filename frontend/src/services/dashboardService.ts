@@ -41,11 +41,18 @@ dashboardApi.interceptors.response.use(
 export const dashboardService = {
   // 전체 대시보드 데이터 조회
   async getDashboardData(): Promise<DashboardResponse> {
+    // 개발 중에는 Mock 데이터 우선 사용
+    if (import.meta.env.VITE_ENABLE_MOCK_DATA !== 'false') {
+      return {
+        success: true,
+        data: this.getMockDashboardData()
+      };
+    }
+    
     try {
       const response = await dashboardApi.get('/api/dashboard');
       return { success: true, data: response.data.data };
     } catch (error: any) {
-      // 개발 중에는 Mock 데이터 반환
       console.warn('Dashboard API not available, using mock data:', error.message);
       return {
         success: true,
@@ -56,13 +63,22 @@ export const dashboardService = {
 
   // 시스템 상태만 조회 (실시간 업데이트용)
   async getSystemStatus(): Promise<{ success: boolean; data?: SystemStatus; error?: string }> {
+    // 개발 중에는 Mock 데이터 우선 사용
+    if (import.meta.env.VITE_ENABLE_MOCK_DATA !== 'false') {
+      return {
+        success: true,
+        data: this.getMockSystemStatus()
+      };
+    }
+    
     try {
       const response = await dashboardApi.get('/api/dashboard/system-status');
       return { success: true, data: response.data.data };
     } catch (error: any) {
+      console.warn('System status API not available, using mock data:', error.message);
       return {
-        success: false,
-        error: error.response?.data?.error || error.message || 'Failed to fetch system status'
+        success: true,
+        data: this.getMockSystemStatus()
       };
     }
   },

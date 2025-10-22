@@ -291,7 +291,7 @@ const DataInitialization: React.FC = () => {
           <Select
             label="테넌트"
             value={selectedTenantId}
-            onChange={(e) => setSelectedTenantId(e.target.value)}
+            onChange={(value) => setSelectedTenantId(value)}
             options={[
               { value: '', label: '테넌트를 선택하세요' },
               ...tenantOptions

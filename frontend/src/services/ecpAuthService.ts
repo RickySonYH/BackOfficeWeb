@@ -1,7 +1,7 @@
 // [advice from AI] ECP 인증 서비스 (포트 6000 연동)
 import axios from 'axios';
 
-const ECP_API_BASE_URL = 'http://localhost:6000';
+const ECP_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
 const ecpApi = axios.create({
   baseURL: ECP_API_BASE_URL,

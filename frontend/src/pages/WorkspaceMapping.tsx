@@ -63,8 +63,7 @@ const WorkspaceMapping: React.FC = () => {
   }, []);
 
   // 테넌트 선택 변경
-  const handleTenantChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const tenantId = e.target.value;
+  const handleTenantChange = (tenantId: string) => {
     setSelectedTenantId(tenantId);
     loadTenantMapping(tenantId);
   };

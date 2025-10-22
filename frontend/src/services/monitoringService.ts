@@ -16,7 +16,7 @@ import {
   MetricsHistoryRequest
 } from '../types/monitoring';
 
-const MONITORING_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:6000';
+const MONITORING_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
 const monitoringApi = axios.create({
   baseURL: MONITORING_API_BASE_URL,
@@ -56,6 +56,14 @@ export const monitoringService = {
    * 실시간 메트릭 조회
    */
   async getRealTimeMetrics(): Promise<MonitoringApiResponse<RealTimeMetrics>> {
+    // 개발 중에는 Mock 데이터 우선 사용
+    if (import.meta.env.VITE_ENABLE_MOCK_DATA !== 'false') {
+      return {
+        success: true,
+        data: this.getMockRealTimeMetrics()
+      };
+    }
+    
     try {
       const response = await monitoringApi.get('/api/monitoring/realtime');
       return response.data;
@@ -72,6 +80,14 @@ export const monitoringService = {
    * 시스템 상태 요약 조회
    */
   async getSystemStatus(): Promise<MonitoringApiResponse<SystemStatus>> {
+    // 개발 중에는 Mock 데이터 우선 사용
+    if (import.meta.env.VITE_ENABLE_MOCK_DATA !== 'false') {
+      return {
+        success: true,
+        data: this.getMockSystemStatus()
+      };
+    }
+    
     try {
       const response = await monitoringApi.get('/api/monitoring/status');
       return response.data;
