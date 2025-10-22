@@ -16,7 +16,7 @@ import {
   MetricsHistoryRequest
 } from '../types/monitoring';
 
-const MONITORING_API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:6000';
+const MONITORING_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:6000';
 
 const monitoringApi = axios.create({
   baseURL: MONITORING_API_BASE_URL,
