@@ -65,7 +65,7 @@ const Dashboard = () => {
     loadDashboardData();
   };
 
-  if (loading && !dashboardData) {
+  if (loading || !dashboardData) {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto">
@@ -119,25 +119,25 @@ const Dashboard = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="bg-blue-50 p-6 rounded-lg border border-blue-100">
                   <div className="text-3xl font-bold text-blue-600 mb-2">
-                    {dashboardData.stats.companies.toLocaleString()}
+                    {dashboardData?.stats?.companies?.toLocaleString() || '0'}
                   </div>
                   <div className="text-sm text-blue-700">등록된 회사 수</div>
                 </div>
                 <div className="bg-green-50 p-6 rounded-lg border border-green-100">
                   <div className="text-3xl font-bold text-green-600 mb-2">
-                    {dashboardData.stats.tenants.toLocaleString()}
+                    {dashboardData?.stats?.tenants?.toLocaleString() || '0'}
                   </div>
                   <div className="text-sm text-green-700">활성 테넌트 수</div>
                 </div>
                 <div className="bg-purple-50 p-6 rounded-lg border border-purple-100">
                   <div className="text-3xl font-bold text-purple-600 mb-2">
-                    {dashboardData.stats.users.toLocaleString()}
+                    {dashboardData?.stats?.users?.toLocaleString() || '0'}
                   </div>
                   <div className="text-sm text-purple-700">전체 사용자 수</div>
                 </div>
                 <div className="bg-orange-50 p-6 rounded-lg border border-orange-100">
                   <div className="text-3xl font-bold text-orange-600 mb-2">
-                    {dashboardData.stats.workspaces.toLocaleString()}
+                    {dashboardData?.stats?.workspaces?.toLocaleString() || '0'}
                   </div>
                   <div className="text-sm text-orange-700">워크스페이스 수</div>
                 </div>
@@ -150,19 +150,19 @@ const Dashboard = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-green-50 p-6 rounded-lg border border-green-100">
                   <div className="text-3xl font-bold text-green-600 mb-2">
-                    {dashboardData.tenant_init_stats.completed.toLocaleString()}
+                    {dashboardData?.tenant_init_stats?.completed?.toLocaleString() || '0'}
                   </div>
                   <div className="text-sm text-green-700">초기화 완료</div>
                 </div>
                 <div className="bg-blue-50 p-6 rounded-lg border border-blue-100">
                   <div className="text-3xl font-bold text-blue-600 mb-2">
-                    {dashboardData.tenant_init_stats.in_progress.toLocaleString()}
+                    {dashboardData?.tenant_init_stats?.in_progress?.toLocaleString() || '0'}
                   </div>
                   <div className="text-sm text-blue-700">초기화 진행 중</div>
                 </div>
                 <div className="bg-red-50 p-6 rounded-lg border border-red-100">
                   <div className="text-3xl font-bold text-red-600 mb-2">
-                    {dashboardData.tenant_init_stats.failed.toLocaleString()}
+                    {dashboardData?.tenant_init_stats?.failed?.toLocaleString() || '0'}
                   </div>
                   <div className="text-sm text-red-700">초기화 실패</div>
                 </div>
@@ -177,7 +177,7 @@ const Dashboard = () => {
                 <div className="bg-white p-6 rounded-lg border border-gray-200">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">최근 등록된 회사</h3>
                   <div className="space-y-3">
-                    {dashboardData.recent_companies.length > 0 ? (
+                    {dashboardData?.recent_companies?.length > 0 ? (
                       dashboardData.recent_companies.map((company) => (
                         <div key={company.id} className="flex justify-between items-start">
                           <div>
@@ -199,7 +199,7 @@ const Dashboard = () => {
                 <div className="bg-white p-6 rounded-lg border border-gray-200">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">최근 생성된 테넌트</h3>
                   <div className="space-y-3">
-                    {dashboardData.recent_tenants.length > 0 ? (
+                    {dashboardData?.recent_tenants?.length > 0 ? (
                       dashboardData.recent_tenants.map((tenant) => (
                         <div key={tenant.id} className="flex justify-between items-start">
                           <div>
@@ -224,7 +224,7 @@ const Dashboard = () => {
                 <div className="bg-white p-6 rounded-lg border border-gray-200">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">최근 데이터 초기화 로그</h3>
                   <div className="space-y-3 max-h-64 overflow-y-auto">
-                    {dashboardData.recent_init_logs.length > 0 ? (
+                    {dashboardData?.recent_init_logs?.length > 0 ? (
                       dashboardData.recent_init_logs.map((log) => (
                         <div key={log.id} className="border-b border-gray-100 pb-2 last:border-b-0">
                           <div className="flex justify-between items-start mb-1">
@@ -254,14 +254,14 @@ const Dashboard = () => {
                 <div className="bg-white p-6 rounded-lg border border-gray-200">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="font-medium text-gray-900">관리 DB</h3>
-                    <span className={`px-3 py-1 rounded-full text-sm ${dashboardService.getStatusColorClass(dashboardData.system_status.management_db.status)}`}>
-                      {dashboardService.getStatusDisplayText(dashboardData.system_status.management_db.status)}
+                    <span className={`px-3 py-1 rounded-full text-sm ${dashboardService.getStatusColorClass(dashboardData?.system_status?.management_db?.status || 'unknown')}`}>
+                      {dashboardService.getStatusDisplayText(dashboardData?.system_status?.management_db?.status || 'unknown')}
                     </span>
                   </div>
                   <div className="text-sm text-gray-600">
-                    포트: {dashboardData.system_status.management_db.port}
+                    포트: {dashboardData?.system_status?.management_db?.port || 'N/A'}
                   </div>
-                  {dashboardData.system_status.management_db.message && (
+                  {dashboardData?.system_status?.management_db?.message && (
                     <div className="text-xs text-gray-500 mt-1">
                       {dashboardData.system_status.management_db.message}
                     </div>
@@ -271,14 +271,14 @@ const Dashboard = () => {
                 <div className="bg-white p-6 rounded-lg border border-gray-200">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="font-medium text-gray-900">백엔드 서비스</h3>
-                    <span className={`px-3 py-1 rounded-full text-sm ${dashboardService.getStatusColorClass(dashboardData.system_status.backend_service.status)}`}>
-                      {dashboardService.getStatusDisplayText(dashboardData.system_status.backend_service.status)}
+                    <span className={`px-3 py-1 rounded-full text-sm ${dashboardService.getStatusColorClass(dashboardData?.system_status?.backend_service?.status || 'unknown')}`}>
+                      {dashboardService.getStatusDisplayText(dashboardData?.system_status?.backend_service?.status || 'unknown')}
                     </span>
                   </div>
                   <div className="text-sm text-gray-600">
-                    포트: {dashboardData.system_status.backend_service.port}
+                    포트: {dashboardData?.system_status?.backend_service?.port || 'N/A'}
                   </div>
-                  {dashboardData.system_status.backend_service.message && (
+                  {dashboardData?.system_status?.backend_service?.message && (
                     <div className="text-xs text-gray-500 mt-1">
                       {dashboardData.system_status.backend_service.message}
                     </div>
@@ -288,12 +288,12 @@ const Dashboard = () => {
                 <div className="bg-white p-6 rounded-lg border border-gray-200">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="font-medium text-gray-900">Kubernetes</h3>
-                    <span className={`px-3 py-1 rounded-full text-sm ${dashboardService.getStatusColorClass(dashboardData.system_status.kubernetes.status)}`}>
-                      {dashboardService.getStatusDisplayText(dashboardData.system_status.kubernetes.status)}
+                    <span className={`px-3 py-1 rounded-full text-sm ${dashboardService.getStatusColorClass(dashboardData?.system_status?.kubernetes?.status || 'unknown')}`}>
+                      {dashboardService.getStatusDisplayText(dashboardData?.system_status?.kubernetes?.status || 'unknown')}
                     </span>
                   </div>
                   <div className="text-sm text-gray-600">클러스터 연결</div>
-                  {dashboardData.system_status.kubernetes.message && (
+                  {dashboardData?.system_status?.kubernetes?.message && (
                     <div className="text-xs text-gray-500 mt-1">
                       {dashboardData.system_status.kubernetes.message}
                     </div>
@@ -303,14 +303,14 @@ const Dashboard = () => {
                 <div className="bg-white p-6 rounded-lg border border-gray-200">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="font-medium text-gray-900">ECP 인증</h3>
-                    <span className={`px-3 py-1 rounded-full text-sm ${dashboardService.getStatusColorClass(dashboardData.system_status.ecp_auth.status)}`}>
-                      {dashboardService.getStatusDisplayText(dashboardData.system_status.ecp_auth.status)}
+                    <span className={`px-3 py-1 rounded-full text-sm ${dashboardService.getStatusColorClass(dashboardData?.system_status?.ecp_auth?.status || 'unknown')}`}>
+                      {dashboardService.getStatusDisplayText(dashboardData?.system_status?.ecp_auth?.status || 'unknown')}
                     </span>
                   </div>
                   <div className="text-sm text-gray-600">
-                    포트: {dashboardData.system_status.ecp_auth.port}
+                    포트: {dashboardData?.system_status?.ecp_auth?.port || 'N/A'}
                   </div>
-                  {dashboardData.system_status.ecp_auth.message && (
+                  {dashboardData?.system_status?.ecp_auth?.message && (
                     <div className="text-xs text-gray-500 mt-1">
                       {dashboardData.system_status.ecp_auth.message}
                     </div>
