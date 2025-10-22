@@ -175,7 +175,7 @@ const EnhancedDashboard: React.FC = () => {
                 }`}
               >
                 {tab.label}
-                {tab.key === 'alerts' && activeAlerts.length > 0 && (
+                {tab.key === 'alerts' && activeAlerts?.length > 0 && (
                   <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
                     {activeAlerts.length}
                   </span>
@@ -211,39 +211,39 @@ const EnhancedDashboard: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="text-center">
                     <div className="text-3xl font-bold text-blue-600 mb-2">
-                      {systemStatus.system.cpu_usage.toFixed(1)}%
+                      {systemStatus?.system?.cpu_usage?.toFixed(1) || '0'}%
                     </div>
                     <div className="text-sm text-gray-600">CPU 사용률</div>
                     <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                       <div 
                         className="bg-blue-600 h-2 rounded-full" 
-                        style={{ width: `${Math.min(systemStatus.system.cpu_usage, 100)}%` }}
+                        style={{ width: `${Math.min(systemStatus?.system?.cpu_usage || 0, 100)}%` }}
                       ></div>
                     </div>
                   </div>
                   
                   <div className="text-center">
                     <div className="text-3xl font-bold text-green-600 mb-2">
-                      {systemStatus.system.memory_usage.toFixed(1)}%
+                      {systemStatus?.system?.memory_usage?.toFixed(1) || '0'}%
                     </div>
                     <div className="text-sm text-gray-600">메모리 사용률</div>
                     <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                       <div 
                         className="bg-green-600 h-2 rounded-full" 
-                        style={{ width: `${Math.min(systemStatus.system.memory_usage, 100)}%` }}
+                        style={{ width: `${Math.min(systemStatus?.system?.memory_usage || 0, 100)}%` }}
                       ></div>
                     </div>
                   </div>
                   
                   <div className="text-center">
                     <div className="text-3xl font-bold text-purple-600 mb-2">
-                      {systemStatus.system.disk_usage.toFixed(1)}%
+                      {systemStatus?.system?.disk_usage?.toFixed(1) || '0'}%
                     </div>
                     <div className="text-sm text-gray-600">디스크 사용률</div>
                     <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
                       <div 
                         className="bg-purple-600 h-2 rounded-full" 
-                        style={{ width: `${Math.min(systemStatus.system.disk_usage, 100)}%` }}
+                        style={{ width: `${Math.min(systemStatus?.system?.disk_usage || 0, 100)}%` }}
                       ></div>
                     </div>
                   </div>
@@ -257,28 +257,28 @@ const EnhancedDashboard: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
                   <div className="text-2xl font-bold text-blue-600 mb-2">
-                    {systemStatus.application.response_time.toFixed(0)}ms
+                    {systemStatus?.application?.response_time?.toFixed(0) || '0'}ms
                   </div>
                   <div className="text-sm text-gray-600">평균 응답시간</div>
                 </div>
                 
                 <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
                   <div className="text-2xl font-bold text-green-600 mb-2">
-                    {systemStatus.application.success_rate.toFixed(1)}%
+                    {systemStatus?.application?.success_rate?.toFixed(1) || '0'}%
                   </div>
                   <div className="text-sm text-gray-600">성공률</div>
                 </div>
                 
                 <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
                   <div className="text-2xl font-bold text-orange-600 mb-2">
-                    {systemStatus.application.error_rate.toFixed(2)}
+                    {systemStatus?.application?.error_rate?.toFixed(2) || '0'}
                   </div>
                   <div className="text-sm text-gray-600">에러율 (분당)</div>
                 </div>
                 
                 <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
                   <div className="text-2xl font-bold text-purple-600 mb-2">
-                    {systemStatus.database.active_connections}
+                    {systemStatus?.database?.active_connections || '0'}
                   </div>
                   <div className="text-sm text-gray-600">활성 DB 연결</div>
                 </div>
@@ -294,15 +294,15 @@ const EnhancedDashboard: React.FC = () => {
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">전체 테넌트</span>
-                      <span className="font-semibold">{systemStatus.tenants.total}</span>
+                      <span className="font-semibold">{systemStatus?.tenants?.total || '0'}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">활성 테넌트</span>
-                      <span className="font-semibold text-green-600">{systemStatus.tenants.active}</span>
+                      <span className="font-semibold text-green-600">{systemStatus?.tenants?.active || '0'}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">높은 사용률</span>
-                      <span className="font-semibold text-orange-600">{systemStatus.tenants.high_usage}</span>
+                      <span className="font-semibold text-orange-600">{systemStatus?.tenants?.high_usage || '0'}</span>
                     </div>
                   </div>
                 </div>
@@ -312,19 +312,19 @@ const EnhancedDashboard: React.FC = () => {
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">전체 솔루션</span>
-                      <span className="font-semibold">{systemStatus.solutions.total}</span>
+                      <span className="font-semibold">{systemStatus?.solutions?.total || '0'}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">정상 상태</span>
-                      <span className="font-semibold text-green-600">{systemStatus.solutions.healthy}</span>
+                      <span className="font-semibold text-green-600">{systemStatus?.solutions?.healthy || '0'}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">주의 상태</span>
-                      <span className="font-semibold text-yellow-600">{systemStatus.solutions.warning}</span>
+                      <span className="font-semibold text-yellow-600">{systemStatus?.solutions?.warning || '0'}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">위험 상태</span>
-                      <span className="font-semibold text-red-600">{systemStatus.solutions.critical}</span>
+                      <span className="font-semibold text-red-600">{systemStatus?.solutions?.critical || '0'}</span>
                     </div>
                   </div>
                 </div>
@@ -354,7 +354,7 @@ const EnhancedDashboard: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {realTimeMetrics.tenants.map((tenant) => (
+                      {realTimeMetrics?.tenants?.length > 0 ? realTimeMetrics.tenants.map((tenant) => (
                         <tr key={tenant.tenant_id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div>
@@ -395,7 +395,13 @@ const EnhancedDashboard: React.FC = () => {
                             </span>
                           </td>
                         </tr>
-                      ))}
+                      )) : (
+                        <tr>
+                          <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                            테넌트 데이터를 로딩 중입니다...
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -406,7 +412,7 @@ const EnhancedDashboard: React.FC = () => {
             <section>
               <h2 className="text-xl font-semibold text-gray-900 mb-4">워크스페이스 성능</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {realTimeMetrics.workspaces.map((workspace) => (
+                {realTimeMetrics?.workspaces?.length > 0 ? realTimeMetrics.workspaces.map((workspace) => (
                   <div key={workspace.workspace_id} className="bg-white p-6 rounded-lg border border-gray-200">
                     <div className="flex justify-between items-start mb-4">
                       <div>
@@ -445,7 +451,11 @@ const EnhancedDashboard: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
+                    <p className="text-gray-500">워크스페이스 데이터를 로딩 중입니다...</p>
+                  </div>
+                )}
               </div>
             </section>
           </div>
@@ -458,11 +468,11 @@ const EnhancedDashboard: React.FC = () => {
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold text-gray-900">활성 알림</h2>
                 <div className="text-sm text-gray-500">
-                  총 {activeAlerts.length}개의 활성 알림
+                  총 {activeAlerts?.length || 0}개의 활성 알림
                 </div>
               </div>
               
-              {activeAlerts.length > 0 ? (
+              {activeAlerts?.length > 0 ? (
                 <div className="space-y-4">
                   {activeAlerts.map((alert) => (
                     <div key={alert.id} className="bg-white p-6 rounded-lg border border-gray-200">
