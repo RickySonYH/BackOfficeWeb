@@ -9,6 +9,8 @@ import { logger } from './config/logger';
 import { testDatabaseConnection } from './config/database';
 import { kubernetesClient } from './config/kubernetes';
 import { internalAuthService } from './services/internal-auth.service';
+import { EcpSyncService } from './services/ecp-sync.service';
+import { MonitoringService } from './services/monitoring.service';
 
 // [advice from AI] 라우트 임포트
 import healthRoutes from './routes/health';
@@ -18,6 +20,8 @@ import tenantsRoutes from './routes/tenants';
 import solutionDeploymentRoutes from './routes/solution-deployment';
 import workspaceConfigurationRoutes from './routes/workspace-configuration';
 import knowledgeDataRoutes from './routes/knowledge-data';
+import enhancedRbacRoutes from './routes/enhanced-rbac';
+import monitoringRoutes from './routes/monitoring';
 
 // 환경 변수 로드
 dotenv.config();
@@ -58,6 +62,8 @@ app.use('/api/tenants', tenantsRoutes);
 app.use('/api/solution-deployment', solutionDeploymentRoutes);
 app.use('/api/workspace-configuration', workspaceConfigurationRoutes);
 app.use('/api/knowledge-data', knowledgeDataRoutes);
+app.use('/api/rbac', enhancedRbacRoutes);
+app.use('/api/monitoring', monitoringRoutes);
 
 // [advice from AI] 기본 루트
 app.get('/', (req, res) => {
@@ -74,6 +80,8 @@ app.get('/', (req, res) => {
       solutionDeployment: '/api/solution-deployment',
       workspaceConfiguration: '/api/workspace-configuration',
       knowledgeData: '/api/knowledge-data',
+      rbac: '/api/rbac',
+      monitoring: '/api/monitoring',
       docs: '/api/docs'
     }
   });
@@ -126,6 +134,26 @@ async function initializeApplication(): Promise<void> {
               logger.info('✅ Default users initialization completed');
             } catch (error) {
               logger.warn('⚠️ Default users initialization failed:', error instanceof Error ? error.message : 'Unknown error');
+            }
+
+            // [advice from AI] ECP 동기화 서비스 시작
+            logger.info('🔄 Starting ECP synchronization service...');
+            try {
+              const ecpSyncService = new EcpSyncService();
+              await ecpSyncService.startSyncService();
+              logger.info('✅ ECP synchronization service started');
+            } catch (error) {
+              logger.warn('⚠️ ECP synchronization service failed to start:', error instanceof Error ? error.message : 'Unknown error');
+            }
+
+            // [advice from AI] 모니터링 서비스 시작
+            logger.info('📊 Starting monitoring service...');
+            try {
+              const monitoringService = new MonitoringService();
+              await monitoringService.startMonitoring();
+              logger.info('✅ Monitoring service started');
+            } catch (error) {
+              logger.warn('⚠️ Monitoring service failed to start:', error instanceof Error ? error.message : 'Unknown error');
             }
 
             logger.info('🎉 AICC Operations Backend initialization completed');

@@ -8,6 +8,7 @@ import ProtectedRoute from './components/common/ProtectedRoute';
 // 페이지 컴포넌트 임포트
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import EnhancedDashboard from './pages/EnhancedDashboard';
 import Companies from './pages/Companies';
 import Tenants from './pages/Tenants';
 import TenantDetail from './pages/TenantDetail';
@@ -28,14 +29,21 @@ function App() {
           {/* 로그인 페이지 */}
           <Route path="/login" element={<Login />} />
           
-          {/* 보호된 라우트들 */}
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <Layout>
-                <Dashboard />
-              </Layout>
-            </ProtectedRoute>
-          } />
+                  {/* 보호된 라우트들 */}
+                  <Route path="/dashboard" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Dashboard />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/monitoring" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <EnhancedDashboard />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
           
           <Route path="/companies" element={
             <ProtectedRoute requiredRoles={['admin', 'manager']}>

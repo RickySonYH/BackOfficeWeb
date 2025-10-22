@@ -12,6 +12,11 @@ const menuItems: MenuItem[] = [
     path: '/dashboard'
   },
   {
+    id: 'monitoring',
+    label: '실시간 모니터링',
+    path: '/monitoring'
+  },
+  {
     id: 'companies',
     label: '회사 관리',
     path: '/companies',
