@@ -185,7 +185,7 @@ export class KnowledgeDataService {
           document.workspace_id,
           i,
           chunks[i],
-          chunks[i].length,
+          chunks[i]?.length || 0,
           JSON.stringify({
             totalChunks: chunks.length,
             chunkOverlap: this.chunkOverlap
@@ -341,7 +341,7 @@ export class KnowledgeDataService {
         // 오버랩 처리
         if (overlap > 0 && chunks.length > 0) {
           const lastChunk = chunks[chunks.length - 1];
-          const overlapText = lastChunk.slice(-overlap);
+          const overlapText = lastChunk?.slice(-overlap) || '';
           currentChunk = overlapText + ' ' + sentenceWithPeriod;
           currentSize = currentChunk.length;
         } else {

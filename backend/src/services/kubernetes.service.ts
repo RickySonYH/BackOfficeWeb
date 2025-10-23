@@ -28,8 +28,8 @@ interface NamespaceStatus {
 // [advice from AI] Kubernetes 서비스 클래스
 export class KubernetesService {
   private kc: k8s.KubeConfig;
-  private k8sApi: k8s.CoreV1Api;
-  private networkingApi: k8s.NetworkingV1Api;
+  private k8sApi!: k8s.CoreV1Api;
+  private networkingApi!: k8s.NetworkingV1Api;
 
   constructor() {
     this.kc = new k8s.KubeConfig();
@@ -423,13 +423,23 @@ export class KubernetesService {
           ns.metadata?.name?.startsWith('aicc-') && 
           ns.metadata?.labels?.['aicc.io/managed-by'] === 'aicc-ops-platform'
         )
-        .map(ns => ({
-          name: ns.metadata?.name || '',
-          tenantKey: ns.metadata?.labels?.['aicc.io/tenant-key'],
-          companyName: ns.metadata?.labels?.['aicc.io/company'],
-          phase: ns.status?.phase || 'Unknown',
-          createdAt: ns.metadata?.creationTimestamp ? new Date(ns.metadata.creationTimestamp) : new Date()
-        }));
+        .map(ns => {
+          const result: any = {
+            name: ns.metadata?.name || '',
+            phase: ns.status?.phase || 'Unknown',
+            createdAt: ns.metadata?.creationTimestamp ? new Date(ns.metadata.creationTimestamp) : new Date()
+          };
+          
+          if (ns.metadata?.labels?.['aicc.io/tenant-key']) {
+            result.tenantKey = ns.metadata.labels['aicc.io/tenant-key'];
+          }
+          
+          if (ns.metadata?.labels?.['aicc.io/company']) {
+            result.companyName = ns.metadata.labels['aicc.io/company'];
+          }
+          
+          return result;
+        });
 
       return {
         success: true,
@@ -503,6 +513,40 @@ export class KubernetesService {
       return `${diffHours}h`;
     } else {
       return `${diffMinutes}m`;
+    }
+  }
+
+  /**
+   * 네임스페이스 리소스 쿼터 업데이트
+   */
+  async updateResourceQuota(
+    namespaceName: string, 
+    quotaName: string, 
+    resourceLimits: { [key: string]: string }
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      const quotaBody = {
+        apiVersion: 'v1',
+        kind: 'ResourceQuota',
+        metadata: {
+          name: quotaName,
+          namespace: namespaceName
+        },
+        spec: {
+          hard: resourceLimits
+        }
+      };
+
+      await this.k8sApi.replaceNamespacedResourceQuota(quotaName, namespaceName, quotaBody);
+      
+      logger.info(`Updated resource quota ${quotaName} in namespace ${namespaceName}`);
+      return { success: true };
+    } catch (error: any) {
+      logger.error(`Failed to update resource quota ${quotaName}:`, error.message);
+      return { 
+        success: false, 
+        error: error.message || 'Failed to update resource quota'
+      };
     }
   }
 }

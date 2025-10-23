@@ -29,8 +29,8 @@ export interface InitializationLog {
   message: string;
   details?: any;
   started_at: string;
-  completed_at?: string;
-  error_message?: string;
+  completed_at: string;
+  error_message: string;
 }
 
 export interface FileParseResult {
@@ -112,8 +112,8 @@ export class DataInitializationService {
       message,
       details,
       started_at: new Date().toISOString(),
-      completed_at: status === 'completed' || status === 'failed' ? new Date().toISOString() : undefined,
-      error_message: errorMessage
+      completed_at: status === 'completed' || status === 'failed' ? new Date().toISOString() : '',
+      error_message: errorMessage || ''
     };
     
     this.logs.push(log);
@@ -125,13 +125,21 @@ export class DataInitializationService {
    */
   private updateLog(logId: string, updates: Partial<InitializationLog>) {
     const logIndex = this.logs.findIndex(log => log.id === logId);
-    if (logIndex !== -1) {
+    if (logIndex !== -1 && this.logs[logIndex]) {
+      const currentLog = this.logs[logIndex];
       this.logs[logIndex] = {
-        ...this.logs[logIndex],
+        id: currentLog.id,
+        tenant_id: currentLog.tenant_id,
+        operation_type: currentLog.operation_type,
+        status: currentLog.status,
+        message: currentLog.message,
+        details: currentLog.details,
+        started_at: currentLog.started_at,
+        error_message: currentLog.error_message,
         ...updates,
         completed_at: updates.status === 'completed' || updates.status === 'failed' 
           ? new Date().toISOString() 
-          : this.logs[logIndex].completed_at
+          : currentLog.completed_at || ''
       };
     }
   }
@@ -608,9 +616,9 @@ export class DataInitializationService {
         data: {
           workspace_id: workspaceId,
           applied_operations: appliedOperations,
-          vector_index_status: vectorIndexStatus,
-          trigger_rules_count: triggerRulesCount,
-          synced_categories_count: syncedCategoriesCount
+          vector_index_status: vectorIndexStatus || 'created',
+          trigger_rules_count: triggerRulesCount || 0,
+          synced_categories_count: syncedCategoriesCount || 0
         },
         logs: this.logs.filter(l => l.tenant_id === workspaceId)
       };
@@ -690,9 +698,9 @@ export class DataInitializationService {
       
       if (dbInitLogs.length > 0) {
         const latestDbLog = dbInitLogs[dbInitLogs.length - 1];
-        if (latestDbLog.details?.initialized_databases) {
+        if (latestDbLog?.details?.initialized_databases) {
           latestDbLog.details.initialized_databases.forEach((dbType: string) => {
-            databaseStatus[dbType] = latestDbLog.status;
+            databaseStatus[dbType] = latestDbLog?.status || 'pending';
           });
         }
       }

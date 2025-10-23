@@ -21,7 +21,7 @@ export const getWorkspaceConfiguration = async (req: Request, res: Response): Pr
     const { environment = 'production' } = req.query;
 
     const result = await workspaceConfigService.getWorkspaceConfiguration(
-      workspaceId,
+      workspaceId!,
       environment as 'development' | 'staging' | 'production'
     );
 
@@ -57,8 +57,8 @@ export const getConfigurationByCategory = async (req: Request, res: Response): P
     const { environment = 'production' } = req.query;
 
     const result = await workspaceConfigService.getConfigurationByCategory(
-      workspaceId,
-      category,
+      workspaceId!,
+      category!,
       environment as 'development' | 'staging' | 'production'
     );
 
@@ -92,14 +92,14 @@ export const updateConfiguration = async (req: Request, res: Response): Promise<
   try {
     const { workspaceId } = req.params;
     const updateRequest: ConfigurationUpdateRequest = {
-      workspaceId,
+      workspaceId: workspaceId!,
       ...req.body,
       updatedBy: (req as any).user?.id || 'system'
     };
 
     // 설정 유효성 검증
     const validationResult = await workspaceConfigService.validateConfiguration(
-      updateRequest.workspaceId,
+      updateRequest.workspaceId!,
       updateRequest.configCategory,
       updateRequest.configKey,
       updateRequest.configValue
@@ -150,7 +150,7 @@ export const bulkUpdateConfiguration = async (req: Request, res: Response): Prom
   try {
     const { workspaceId } = req.params;
     const bulkRequest: BulkConfigurationUpdateRequest = {
-      workspaceId,
+      workspaceId: workspaceId!,
       ...req.body,
       updatedBy: (req as any).user?.id || 'system'
     };
@@ -164,7 +164,7 @@ export const bulkUpdateConfiguration = async (req: Request, res: Response): Prom
 
     for (const config of bulkRequest.updates) {
       const validationResult = await workspaceConfigService.validateConfiguration(
-        workspaceId,
+        workspaceId!,
         config.configCategory,
         config.configKey,
         config.configValue
@@ -190,7 +190,7 @@ export const bulkUpdateConfiguration = async (req: Request, res: Response): Prom
     }
 
     const result = await workspaceConfigService.bulkUpdateConfiguration(
-      bulkRequest.workspaceId,
+      bulkRequest.workspaceId!,
       bulkRequest.updates,
       bulkRequest.environment,
       bulkRequest.updatedBy,
@@ -228,7 +228,7 @@ export const rollbackConfiguration = async (req: Request, res: Response): Promis
   try {
     const { workspaceId } = req.params;
     const rollbackRequest: ConfigurationRollbackRequest = {
-      workspaceId,
+      workspaceId: workspaceId!,
       ...req.body,
       rolledBackBy: (req as any).user?.id || 'system'
     };
@@ -273,7 +273,7 @@ export const getConfigurationHistory = async (req: Request, res: Response): Prom
     } = req.query;
 
     const result = await workspaceConfigService.getConfigurationHistory(
-      workspaceId,
+      workspaceId!,
       configCategory as string,
       configKey as string,
       parseInt(limit as string),
@@ -313,7 +313,7 @@ export const validateConfiguration = async (req: Request, res: Response): Promis
     const { configCategory, configKey, configValue } = req.body;
 
     const result = await workspaceConfigService.validateConfiguration(
-      workspaceId,
+      workspaceId!,
       configCategory,
       configKey,
       configValue
@@ -341,7 +341,7 @@ export const getConfigurationTemplates = async (req: Request, res: Response): Pr
   try {
     const { workspaceType } = req.params;
 
-    if (!['KMS', 'ADVISOR'].includes(workspaceType)) {
+    if (!workspaceType || !['KMS', 'ADVISOR'].includes(workspaceType)) {
       res.status(400).json({
         success: false,
         error: 'Invalid workspace type. Must be KMS or ADVISOR',
@@ -384,7 +384,7 @@ export const deployConfiguration = async (req: Request, res: Response): Promise<
   try {
     const { workspaceId } = req.params;
     const deploymentRequest: ConfigurationDeploymentRequest = {
-      workspaceId,
+      workspaceId: workspaceId!,
       ...req.body,
       deployedBy: (req as any).user?.id || 'system'
     };
@@ -424,7 +424,7 @@ export const exportConfiguration = async (req: Request, res: Response): Promise<
     const { environment = 'production', format = 'json' } = req.query;
 
     const configResult = await workspaceConfigService.getWorkspaceConfiguration(
-      workspaceId,
+      workspaceId!,
       environment as 'development' | 'staging' | 'production'
     );
 
@@ -439,7 +439,7 @@ export const exportConfiguration = async (req: Request, res: Response): Promise<
 
     // 설정 데이터를 내보내기 형식으로 변환
     const exportData = {
-      workspaceId,
+      workspaceId: workspaceId!,
       environment,
       exportedAt: new Date().toISOString(),
       exportedBy: (req as any).user?.id || 'system',
@@ -448,11 +448,13 @@ export const exportConfiguration = async (req: Request, res: Response): Promise<
 
     // 카테고리별로 그룹화
     const configsByCategory: { [category: string]: { [key: string]: any } } = {};
-    for (const config of configResult.data) {
-      if (!configsByCategory[config.config_category]) {
-        configsByCategory[config.config_category] = {};
+    for (const config of configResult.data || []) {
+      if (config.config_category && config.config_key) {
+        if (!configsByCategory[config.config_category]) {
+          configsByCategory[config.config_category] = {};
+        }
+        configsByCategory[config.config_category]![config.config_key] = config.config_value;
       }
-      configsByCategory[config.config_category][config.config_key] = config.config_value;
     }
 
     (exportData as any).configurations = configsByCategory;
@@ -530,7 +532,7 @@ export const importConfiguration = async (req: Request, res: Response): Promise<
     // 기존 설정 확인 (덮어쓰기 옵션이 false인 경우)
     if (!overwriteExisting) {
       const existingConfig = await workspaceConfigService.getWorkspaceConfiguration(
-        workspaceId,
+        workspaceId!,
         environment as 'development' | 'staging' | 'production'
       );
 
@@ -546,7 +548,7 @@ export const importConfiguration = async (req: Request, res: Response): Promise<
 
     // 대량 업데이트 실행
     const result = await workspaceConfigService.bulkUpdateConfiguration(
-      workspaceId,
+      workspaceId!,
       updates,
       environment as 'development' | 'staging' | 'production',
       (req as any).user?.id || 'system',

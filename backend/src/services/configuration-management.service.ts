@@ -81,8 +81,8 @@ export class ConfigurationManagementService {
         config_key: data.config_key,
         old_value: null,
         new_value: data.config_value,
-        change_reason: data.change_reason,
-        change_description: data.change_description,
+        change_reason: data.change_reason || 'Configuration created',
+        change_description: data.change_description || 'New configuration created',
         changed_by: data.created_by
       });
 
@@ -184,11 +184,11 @@ export class ConfigurationManagementService {
         config_key: existingConfig.config_key,
         old_value: JSON.parse(existingConfig.config_value),
         new_value: data.config_value,
-        change_reason: data.change_reason,
-        change_description: data.change_description,
+        change_reason: data.change_reason || 'Configuration updated',
+        change_description: data.change_description || 'Configuration value updated',
         impact_assessment: data.impact_assessment,
         changed_by: data.updated_by,
-        change_approved_by: data.approved_by
+        change_approved_by: data.approved_by || 'system'
       });
 
       await client.query('COMMIT');
@@ -489,7 +489,7 @@ export class ConfigurationManagementService {
 
       return {
         is_valid: errors.length === 0,
-        errors: errors.length > 0 ? errors : undefined
+        errors: errors.length > 0 ? errors : []
       };
 
     } catch (error) {

@@ -33,8 +33,8 @@ interface RoleChangeEvent {
   event_type: 'role_assigned' | 'role_revoked' | 'role_updated' | 'permission_changed';
   user_id: string;
   role_id: string;
-  tenant_id?: string;
-  workspace_id?: string;
+  tenant_id?: string | undefined;
+  workspace_id?: string | undefined;
   timestamp: string;
   changed_by: string;
   metadata?: any;
@@ -66,7 +66,7 @@ export class EcpSyncService {
     this.syncTimer = setInterval(async () => {
       try {
         await this.performIncrementalSync();
-      } catch (error) {
+      } catch (error: any) {
         logger.error('Periodic ECP sync failed:', error);
       }
     }, this.syncInterval);
@@ -114,7 +114,7 @@ export class EcpSyncService {
           result.created_assignments += syncResult.created;
           result.updated_assignments += syncResult.updated;
           result.removed_assignments += syncResult.removed;
-        } catch (error) {
+        } catch (error: any) {
           const errorMsg = `Failed to sync user ${ecpUser.user_id}: ${error}`;
           result.errors.push(errorMsg);
           logger.error(errorMsg);
@@ -134,7 +134,7 @@ export class EcpSyncService {
         total_changes: result.created_assignments + result.updated_assignments + result.removed_assignments
       });
 
-    } catch (error) {
+    } catch (error: any) {
       result.success = false;
       result.errors.push(`Full sync failed: ${error}`);
       logger.error('Full ECP synchronization failed:', error);
@@ -175,7 +175,7 @@ export class EcpSyncService {
           result.created_assignments += syncResult.created;
           result.updated_assignments += syncResult.updated;
           result.removed_assignments += syncResult.removed;
-        } catch (error) {
+        } catch (error: any) {
           const errorMsg = `Failed to sync user ${ecpUser.user_id}: ${error}`;
           result.errors.push(errorMsg);
           logger.error(errorMsg);
@@ -190,7 +190,7 @@ export class EcpSyncService {
         synchronized_users: result.synchronized_users
       });
 
-    } catch (error) {
+    } catch (error: any) {
       result.success = false;
       result.errors.push(`Incremental sync failed: ${error}`);
       logger.error('Incremental ECP synchronization failed:', error);
@@ -212,9 +212,9 @@ export class EcpSyncService {
         timeout: 30000
       });
 
-      return response.data.data || [];
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
+      return (response.data as any)?.data || [];
+    } catch (error: any) {
+      if (error.response) {
         logger.error('ECP API error:', {
           status: error.response?.status,
           statusText: error.response?.statusText,
@@ -241,9 +241,9 @@ export class EcpSyncService {
         timeout: 30000
       });
 
-      return response.data.data || [];
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
+      return (response.data as any)?.data || [];
+    } catch (error: any) {
+      if (error.response) {
         logger.error('ECP API error:', {
           status: error.response?.status,
           statusText: error.response?.statusText,
@@ -291,8 +291,8 @@ export class EcpSyncService {
             event_type: 'role_assigned',
             user_id: ecpUser.user_id,
             role_id: mappedRole.internal_role_id,
-            tenant_id: mappedRole.tenant_id,
-            workspace_id: mappedRole.workspace_id,
+            tenant_id: mappedRole.tenant_id || undefined,
+            workspace_id: mappedRole.workspace_id || undefined,
             timestamp: new Date().toISOString(),
             changed_by: 'ecp_sync_service',
             metadata: { ecp_role_id: ecpUser.role_id, sync_type: 'automatic' }
@@ -308,8 +308,8 @@ export class EcpSyncService {
               event_type: 'role_updated',
               user_id: ecpUser.user_id,
               role_id: mappedRole.internal_role_id,
-              tenant_id: mappedRole.tenant_id,
-              workspace_id: mappedRole.workspace_id,
+              tenant_id: mappedRole.tenant_id || undefined,
+              workspace_id: mappedRole.workspace_id || undefined,
               timestamp: new Date().toISOString(),
               changed_by: 'ecp_sync_service',
               metadata: { ecp_role_id: ecpUser.role_id, sync_type: 'automatic' }
@@ -341,7 +341,7 @@ export class EcpSyncService {
       await client.query('COMMIT');
       return result;
 
-    } catch (error) {
+    } catch (error: any) {
       await client.query('ROLLBACK');
       throw error;
     } finally {
@@ -397,14 +397,21 @@ export class EcpSyncService {
         mappedRoles.push({
           internal_role_id: defaultRoleId,
           resource_type: ecpUser.workspace_id ? 'workspace' : (ecpUser.tenant_id ? 'tenant' : 'system'),
-          resource_id: ecpUser.workspace_id || ecpUser.tenant_id,
-          tenant_id: ecpUser.tenant_id,
-          workspace_id: ecpUser.workspace_id
+          resource_id: ecpUser.workspace_id || ecpUser.tenant_id || undefined,
+          tenant_id: ecpUser.tenant_id || undefined,
+          workspace_id: ecpUser.workspace_id || undefined
         });
       }
     }
 
-    return mappedRoles;
+    return mappedRoles as Array<{
+      internal_role_id: string;
+      resource_type: 'system' | 'tenant' | 'workspace';
+      resource_id?: string;
+      tenant_id?: string;
+      workspace_id?: string;
+      conditions?: any;
+    }>;
   }
 
   /**
@@ -608,7 +615,7 @@ export class EcpSyncService {
         timeout: 30000
       });
 
-      const ecpUser: EcpUserRole = response.data.data;
+      const ecpUser: EcpUserRole = (response.data as any)?.data;
       
       if (!ecpUser) {
         return {
@@ -627,7 +634,7 @@ export class EcpSyncService {
         changes
       };
 
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Manual sync failed for user ${userId}:`, error);
       return {
         success: false,
@@ -660,10 +667,10 @@ export class EcpSyncService {
       return {
         connected: true,
         response_time: Date.now() - startTime,
-        version: response.data.version
+        version: (response.data as any)?.version
       };
 
-    } catch (error) {
+    } catch (error: any) {
       return {
         connected: false,
         response_time: Date.now() - startTime,

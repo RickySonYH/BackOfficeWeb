@@ -2,6 +2,7 @@
 import express from 'express';
 import { authenticate } from '../middleware/auth';
 import { authorize } from '../middleware/auth';
+import { UserRole } from '../types/auth';
 import {
   registerSolution,
   getSolutions,
@@ -26,7 +27,7 @@ router.use(authenticate);
  * @access  Admin, Manager
  */
 router.post('/solutions', 
-  authorize(['admin', 'manager']), 
+  authorize([UserRole.ADMIN, UserRole.MANAGER]), 
   registerSolution
 );
 
@@ -39,7 +40,7 @@ router.post('/solutions',
  *          sort_field, sort_direction
  */
 router.get('/solutions', 
-  authorize(['admin', 'manager', 'user']), 
+  authorize([UserRole.ADMIN, UserRole.MANAGER, UserRole.USER]), 
   getSolutions
 );
 
@@ -49,7 +50,7 @@ router.get('/solutions',
  * @access  Admin, Manager, User
  */
 router.get('/solutions/:solutionId', 
-  authorize(['admin', 'manager', 'user']), 
+  authorize([UserRole.ADMIN, UserRole.MANAGER, UserRole.USER]), 
   getSolutionDetails
 );
 
@@ -60,7 +61,7 @@ router.get('/solutions/:solutionId',
  * @query   force - true일 경우 활성 테넌트가 있어도 강제 삭제
  */
 router.delete('/solutions/:solutionId', 
-  authorize(['admin']), 
+  authorize([UserRole.ADMIN]), 
   deleteSolution
 );
 
@@ -71,7 +72,7 @@ router.delete('/solutions/:solutionId',
  * @body    { tenant_id, solution_id, allocated_cpu_cores, allocated_memory_gb, allocated_storage_gb, ... }
  */
 router.post('/assignments', 
-  authorize(['admin', 'manager']), 
+  authorize([UserRole.ADMIN, UserRole.MANAGER]), 
   assignTenantToSolution
 );
 
@@ -82,7 +83,7 @@ router.post('/assignments',
  * @body    { cpu_cores, memory_gb, storage_gb, gpu_count, network_bandwidth }
  */
 router.post('/optimal-solution', 
-  authorize(['admin', 'manager']), 
+  authorize([UserRole.ADMIN, UserRole.MANAGER]), 
   findOptimalSolution
 );
 
@@ -92,7 +93,7 @@ router.post('/optimal-solution',
  * @access  Admin, Manager, User
  */
 router.get('/resource-summary', 
-  authorize(['admin', 'manager', 'user']), 
+  authorize([UserRole.ADMIN, UserRole.MANAGER, UserRole.USER]), 
   getResourceSummary
 );
 
@@ -102,7 +103,7 @@ router.get('/resource-summary',
  * @access  Admin, Manager
  */
 router.get('/tenant-allocations', 
-  authorize(['admin', 'manager']), 
+  authorize([UserRole.ADMIN, UserRole.MANAGER]), 
   getTenantAllocations
 );
 
@@ -112,7 +113,7 @@ router.get('/tenant-allocations',
  * @access  Admin, Manager, User
  */
 router.post('/solutions/:solutionId/health-check', 
-  authorize(['admin', 'manager', 'user']), 
+  authorize([UserRole.ADMIN, UserRole.MANAGER, UserRole.USER]), 
   performHealthCheck
 );
 
@@ -122,7 +123,7 @@ router.post('/solutions/:solutionId/health-check',
  * @access  Admin, Manager
  */
 router.post('/health-checks/all', 
-  authorize(['admin', 'manager']), 
+  authorize([UserRole.ADMIN, UserRole.MANAGER]), 
   performAllHealthChecks
 );
 

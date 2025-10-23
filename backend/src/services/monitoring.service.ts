@@ -103,9 +103,9 @@ export class MonitoringService {
     // 디스크 사용량 (루트 파티션)
     let diskUsage = { used_gb: 0, total_gb: 0, usage_percent: 0, available_gb: 0 };
     try {
-      const stats = await promisify(fs.statvfs)('/');
-      const total = (stats.blocks * stats.frsize) / (1024 ** 3);
-      const available = (stats.bavail * stats.frsize) / (1024 ** 3);
+      const stats = await promisify(fs.statfs)('/');
+      const total = (stats.blocks * stats.bsize) / (1024 ** 3);
+      const available = (stats.bavail * stats.bsize) / (1024 ** 3);
       const used = total - available;
       
       diskUsage = {
@@ -566,6 +566,7 @@ export class MonitoringService {
       logger.error('Failed to get metrics:', error);
       return {
         success: false,
+        data: null as any,
         error: error instanceof Error ? error.message : 'Unknown error'
       };
     }
@@ -672,9 +673,12 @@ export class MonitoringService {
     return {
       resource_type: resourceType as any,
       current_usage: currentUsage,
-      predicted_usage: predictions,
+      predicted_usage: predictions.map(p => ({
+        ...p,
+        date: p.date || new Date().toISOString()
+      })),
       capacity_threshold: capacityThreshold,
-      estimated_exhaustion_date: exhaustionDate,
+      estimated_exhaustion_date: exhaustionDate || '',
       recommendations: this.generateCapacityRecommendations(resourceType, trend, currentUsage, capacityThreshold)
     };
   }

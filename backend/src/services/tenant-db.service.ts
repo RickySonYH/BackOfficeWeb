@@ -53,7 +53,7 @@ export class TenantDbService {
     
     const encrypted = parts[1];
     const decipher = crypto.createDecipher('aes-256-cbc', this.encryptionKey);
-    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+    let decrypted = decipher.update(encrypted || '', 'hex', 'utf8');
     decrypted += decipher.final('utf8');
     return decrypted;
   }

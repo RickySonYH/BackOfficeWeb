@@ -182,10 +182,11 @@ export class SolutionDeploymentService {
         try {
           await this.kubernetesService.updateResourceQuota(
             solution.kubernetes_namespace,
+            'tenant-quota',
             {
-              cpu: requiredCpu,
-              memory: requiredMemory,
-              storage: data.allocated_storage_gb || 10.0
+              cpu: `${requiredCpu}`,
+              memory: `${requiredMemory}Gi`,
+              storage: `${data.allocated_storage_gb || 10}Gi`
             }
           );
         } catch (k8sError) {
@@ -372,7 +373,7 @@ export class SolutionDeploymentService {
           response_code: response.status,
           response_time_ms: responseTime,
           checked_at: new Date().toISOString(),
-          error_message: response.status >= 400 ? `HTTP ${response.status}` : undefined
+          error_message: response.status >= 400 ? `HTTP ${response.status}` : ''
         };
 
         // DB에 헬스 체크 결과 업데이트

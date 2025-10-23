@@ -130,19 +130,19 @@ export class EnhancedRbacService {
       const permissionCheck: PermissionCheck = {
         user_id: request.user_id,
         resource_type: check.resource_type as any,
-        resource_id: check.resource_id,
         action: check.action,
-        context: request.context
+        context: request.context,
+        ...(check.resource_id && { resource_id: check.resource_id })
       };
 
       const result = await this.checkPermission(permissionCheck);
       
       results.push({
         resource_type: check.resource_type,
-        resource_id: check.resource_id,
         action: check.action,
         allowed: result.allowed,
-        reason: result.reason
+        reason: result.reason,
+        ...(check.resource_id && { resource_id: check.resource_id })
       });
 
       if (result.allowed) {
@@ -313,7 +313,7 @@ export class EnhancedRbacService {
    */
   private doesPermissionMatch(permission: Permission, check: PermissionCheck): boolean {
     // 리소스 타입 매칭
-    if (permission.resource_type !== check.resource_type && permission.resource_type !== '*') {
+    if (permission.resource_type !== check.resource_type && permission.resource_type !== 'all') {
       return false;
     }
 

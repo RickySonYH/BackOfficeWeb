@@ -117,13 +117,13 @@ export const getSolutions = async (req: Request, res: Response): Promise<void> =
 
     // 필터 파라미터 파싱
     const filter: SolutionFilter = {
-      status: req.query.status ? (req.query.status as string).split(',') : undefined,
-      deployment_type: req.query.deployment_type ? (req.query.deployment_type as string).split(',') : undefined,
+      status: req.query.status ? (req.query.status as string).split(',') : [],
+      deployment_type: req.query.deployment_type ? (req.query.deployment_type as string).split(',') : [],
       kubernetes_cluster: req.query.kubernetes_cluster as string,
-      health_status: req.query.health_status ? (req.query.health_status as string).split(',') : undefined,
-      min_available_cpu: req.query.min_available_cpu ? parseFloat(req.query.min_available_cpu as string) : undefined,
-      min_available_memory: req.query.min_available_memory ? parseFloat(req.query.min_available_memory as string) : undefined,
-      min_available_tenants: req.query.min_available_tenants ? parseInt(req.query.min_available_tenants as string) : undefined
+      health_status: req.query.health_status ? (req.query.health_status as string).split(',') : [],
+      min_available_cpu: req.query.min_available_cpu ? parseFloat(req.query.min_available_cpu as string) : 0,
+      min_available_memory: req.query.min_available_memory ? parseFloat(req.query.min_available_memory as string) : 0,
+      min_available_tenants: req.query.min_available_tenants ? parseInt(req.query.min_available_tenants as string) : 0
     };
 
     // 정렬 파라미터 파싱

@@ -4,7 +4,7 @@ export interface Permission {
   id: string;
   name: string;
   description: string;
-  resource_type: 'workspace' | 'tenant' | 'company' | 'system' | 'solution';
+  resource_type: 'workspace' | 'tenant' | 'company' | 'system' | 'solution' | 'all';
   action: string; // 'create', 'read', 'update', 'delete', 'execute', 'manage'
   scope: 'global' | 'tenant' | 'workspace' | 'resource';
   conditions?: PermissionCondition[];
@@ -69,7 +69,7 @@ export interface EcpRoleMapping {
 
 export interface PermissionCheck {
   user_id: string;
-  resource_type: 'workspace' | 'tenant' | 'company' | 'system' | 'solution';
+  resource_type: 'workspace' | 'tenant' | 'company' | 'system' | 'solution' | 'all';
   resource_id?: string;
   action: string;
   context?: {

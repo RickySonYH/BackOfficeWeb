@@ -70,9 +70,9 @@ export class MonitoringController {
         },
         granularity: granularity as any,
         filters: {
-          tenant_ids: tenant_ids ? (Array.isArray(tenant_ids) ? tenant_ids as string[] : [tenant_ids as string]) : undefined,
-          workspace_ids: workspace_ids ? (Array.isArray(workspace_ids) ? workspace_ids as string[] : [workspace_ids as string]) : undefined,
-          solution_ids: solution_ids ? (Array.isArray(solution_ids) ? solution_ids as string[] : [solution_ids as string]) : undefined
+          tenant_ids: tenant_ids ? (Array.isArray(tenant_ids) ? tenant_ids as string[] : [tenant_ids as string]) : [],
+          workspace_ids: workspace_ids ? (Array.isArray(workspace_ids) ? workspace_ids as string[] : [workspace_ids as string]) : [],
+          solution_ids: solution_ids ? (Array.isArray(solution_ids) ? solution_ids as string[] : [solution_ids as string]) : []
         }
       };
 

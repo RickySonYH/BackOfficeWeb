@@ -49,7 +49,7 @@ export class CompanyLifecycleService {
       logger.info('Default tenant created successfully', { tenantId: tenant.id });
 
       // 3. Kubernetes 네임스페이스 생성
-      const kubernetesResult = await this.kubernetesService.createNamespace(tenant.tenant_key);
+      const kubernetesResult = await this.kubernetesService.createNamespace(tenant.tenantKey);
       if (!kubernetesResult.success) {
         throw new Error(`Failed to create Kubernetes namespace: ${kubernetesResult.error}`);
       }
@@ -100,8 +100,8 @@ export class CompanyLifecycleService {
         tenant,
         workspaces,
         adminUser,
-        kubernetesNamespace: kubernetesResult.namespaceName || tenant.kubernetes_namespace,
-        solutionMapping: solutionMapping || undefined
+        kubernetesNamespace: kubernetesResult.namespaceName || (tenant as any).kubernetes_namespace,
+        solutionMapping: solutionMapping || {} as TenantSolutionMapping
       };
 
     } catch (error) {
@@ -512,10 +512,10 @@ export class CompanyLifecycleService {
       // 2. Kubernetes 리소스 정리
       for (const tenant of tenants.rows) {
         try {
-          await this.kubernetesService.deleteNamespace(tenant.kubernetes_namespace);
+          await this.kubernetesService.deleteNamespace((tenant as any).kubernetes_namespace);
         } catch (error) {
           logger.warn('Failed to delete Kubernetes namespace', {
-            namespace: tenant.kubernetes_namespace,
+            namespace: (tenant as any).kubernetes_namespace,
             error: error instanceof Error ? error.message : 'Unknown error'
           });
         }

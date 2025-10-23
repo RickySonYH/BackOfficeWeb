@@ -42,10 +42,10 @@ export class EnhancedRbacController {
         resource_id,
         action,
         context: {
-          ip_address: req.ip,
+          ...(req.ip && { ip_address: req.ip }),
           additional_data: {
-            user_agent: req.get('User-Agent'),
-            session_id: req.session?.id
+            ...(req.get('User-Agent') && { user_agent: req.get('User-Agent') }),
+            session_id: (req as any).session?.id
           }
         }
       };
@@ -85,9 +85,9 @@ export class EnhancedRbacController {
         user_id,
         checks,
         context: {
-          ip_address: req.ip,
-          user_agent: req.get('User-Agent'),
-          session_id: req.session?.id
+          ...(req.ip && { ip_address: req.ip }),
+          ...(req.get('User-Agent') && { user_agent: req.get('User-Agent') }),
+          session_id: (req as any).session?.id
         }
       };
 

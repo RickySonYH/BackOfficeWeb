@@ -2,7 +2,7 @@
 
 import { pool } from '../config/database';
 import { logger } from '../config/logger';
-import { kubernetesClient } from './kubernetes.service';
+import { kubernetesService } from './kubernetes.service';
 import { 
   Tenant, 
   TenantWithCompany, 
@@ -162,7 +162,7 @@ class TenantService {
       );
       
       // Kubernetes namespace 생성
-      const success = await kubernetesClient.createNamespace(namespace);
+      const success = await kubernetesService.createNamespace(namespace);
       
       if (success) {
         // 네임스페이스 생성 성공
@@ -385,14 +385,28 @@ class TenantService {
     const key = crypto.createHash('sha256').update(process.env.DB_ENCRYPTION_KEY || 'default-key').digest();
     
     const parts = encryptedPassword.split(':');
-    const iv = Buffer.from(parts[0], 'hex');
-    const encrypted = parts[1];
+    const iv = Buffer.from(parts[0] || '', 'hex');
+    const encrypted = parts[1] || '';
     
     const decipher = crypto.createDecipher(algorithm, key);
     let decrypted = decipher.update(encrypted, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
     
     return decrypted;
+  }
+
+  /**
+   * 테넌트 배포 상태 업데이트
+   */
+  async updateTenantDeploymentStatus(tenantId: string, status: 'active' | 'inactive' | 'pending' | 'failed'): Promise<void> {
+    const query = `
+      UPDATE tenants 
+      SET deployment_status = $1, updated_at = CURRENT_TIMESTAMP
+      WHERE id = $2
+    `;
+    
+    await pool.query(query, [status, tenantId]);
+    logger.info(`Updated tenant ${tenantId} deployment status to ${status}`);
   }
 }
 

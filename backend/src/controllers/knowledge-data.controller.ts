@@ -67,7 +67,7 @@ export const uploadKnowledgeDocument = async (req: Request, res: Response): Prom
     for (const file of files) {
       try {
         const uploadRequest: KnowledgeUploadRequest = {
-          workspaceId,
+          workspaceId: workspaceId!,
           originalName: file.originalname,
           fileBuffer: file.buffer,
           fileType: file.mimetype,
@@ -138,7 +138,7 @@ export const searchKnowledgeDocuments = async (req: Request, res: Response): Pro
   try {
     const { workspaceId } = req.params;
     const searchRequest: KnowledgeSearchRequest = {
-      workspaceId,
+      workspaceId: workspaceId!,
       query: req.body.query || req.query.query as string,
       limit: parseInt(req.body.limit || req.query.limit as string) || 10,
       offset: parseInt(req.body.offset || req.query.offset as string) || 0,
@@ -202,10 +202,10 @@ export const getKnowledgeDocuments = async (req: Request, res: Response): Promis
       limit: parseInt(limit as string),
       categoryId: categoryId as string,
       status: status as string,
-      tags: tags ? (tags as string).split(',') : undefined
+      tags: tags ? (tags as string).split(',') : []
     };
 
-    const result = await knowledgeDataService.getKnowledgeDocuments(workspaceId, options);
+    const result = await knowledgeDataService.getKnowledgeDocuments(workspaceId!, options);
 
     if (result.success) {
       res.json({
@@ -238,7 +238,7 @@ export const getKnowledgeDocumentById = async (req: Request, res: Response): Pro
     const { workspaceId, documentId } = req.params;
 
     // 문서 정보 조회 (간단한 구현)
-    const result = await knowledgeDataService.getKnowledgeDocuments(workspaceId, {
+    const result = await knowledgeDataService.getKnowledgeDocuments(workspaceId!, {
       page: 1,
       limit: 1
     });
@@ -284,7 +284,7 @@ export const deleteKnowledgeDocument = async (req: Request, res: Response): Prom
     const { documentId } = req.params;
     const deletedBy = (req as any).user?.id || 'system';
 
-    const result = await knowledgeDataService.deleteKnowledgeDocument(documentId, deletedBy);
+    const result = await knowledgeDataService.deleteKnowledgeDocument(documentId!, deletedBy);
 
     if (result.success) {
       res.json({
@@ -316,7 +316,7 @@ export const getProcessingStatus = async (req: Request, res: Response): Promise<
   try {
     const { documentId } = req.params;
 
-    const result = await knowledgeDataService.getProcessingStatus(documentId);
+    const result = await knowledgeDataService.getProcessingStatus(documentId!);
 
     if (result.success) {
       res.json({

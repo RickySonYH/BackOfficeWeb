@@ -12,12 +12,12 @@ import {
   getKnowledgeBaseStats,
   reprocessKnowledgeDocument
 } from '../controllers/knowledge-data.controller';
-import { authenticateToken, requireManagerOrAdmin } from '../middleware/auth';
+import { authenticate, requireManagerOrAdmin } from '../middleware/auth';
 
 const router = Router();
 
 // [advice from AI] 모든 라우트에 인증 미들웨어 적용
-router.use(authenticateToken);
+router.use(authenticate);
 
 // [advice from AI] GET /api/knowledge-data/:workspaceId - 지식 문서 목록 조회
 // 모든 인증된 사용자가 접근 가능

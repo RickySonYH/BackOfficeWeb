@@ -8,12 +8,12 @@ import {
   updateCompany, 
   deleteCompany 
 } from '../controllers/companies.controller';
-import { authenticateToken, requireManagerOrAdmin, requireAdmin } from '../middleware/auth';
+import { authenticate, requireManagerOrAdmin, requireAdmin } from '../middleware/auth';
 
 const router = Router();
 
 // [advice from AI] 모든 라우트에 인증 미들웨어 적용
-router.use(authenticateToken);
+router.use(authenticate);
 
 // [advice from AI] GET /api/companies - 회사 목록 조회 (페이지네이션)
 // 모든 인증된 사용자가 접근 가능

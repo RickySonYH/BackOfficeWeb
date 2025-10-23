@@ -106,7 +106,7 @@ router.get('/:id', authenticate, authorize([UserRole.ADMIN, UserRole.MANAGER]), 
     const tenantId = req.params.id;
 
     // UUID 형식 검증
-    if (!tenantId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+    if (!tenantId || !tenantId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
       return next(new ApiError(400, 'Invalid tenant ID format'));
     }
 
@@ -134,7 +134,7 @@ router.get('/:id/db-connections', authenticate, authorize([UserRole.ADMIN, UserR
     const tenantId = req.params.id;
 
     // UUID 형식 검증
-    if (!tenantId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+    if (!tenantId || !tenantId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
       return next(new ApiError(400, 'Invalid tenant ID format'));
     }
 
@@ -164,7 +164,7 @@ router.post('/:id/db-connections', authenticate, authorize([UserRole.ADMIN, User
     const tenantId = req.params.id;
 
     // UUID 형식 검증
-    if (!tenantId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+    if (!tenantId || !tenantId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
       return next(new ApiError(400, 'Invalid tenant ID format'));
     }
 
@@ -208,7 +208,8 @@ router.post('/:id/db-connections/:connectionId/test', authenticate, authorize([U
     const connectionId = req.params.connectionId;
 
     // UUID 형식 검증
-    if (!tenantId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i) ||
+    if (!tenantId || !connectionId || 
+        !tenantId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i) ||
         !connectionId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
       return next(new ApiError(400, 'Invalid ID format'));
     }
@@ -264,7 +265,7 @@ router.get('/:id/kubernetes', authenticate, authorize([UserRole.ADMIN, UserRole.
     const tenantId = req.params.id;
 
     // UUID 형식 검증
-    if (!tenantId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+    if (!tenantId || !tenantId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
       return next(new ApiError(400, 'Invalid tenant ID format'));
     }
 
@@ -300,7 +301,7 @@ router.get('/:id/kubernetes/pods', authenticate, authorize([UserRole.ADMIN, User
     const tenantId = req.params.id;
 
     // UUID 형식 검증
-    if (!tenantId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+    if (!tenantId || !tenantId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
       return next(new ApiError(400, 'Invalid tenant ID format'));
     }
 
@@ -339,7 +340,7 @@ router.post('/:id/kubernetes/create', authenticate, authorize([UserRole.ADMIN]),
     const tenantId = req.params.id;
 
     // UUID 형식 검증
-    if (!tenantId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+    if (!tenantId || !tenantId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
       return next(new ApiError(400, 'Invalid tenant ID format'));
     }
 
@@ -388,7 +389,7 @@ router.delete('/:id/kubernetes', authenticate, authorize([UserRole.ADMIN]), asyn
     const tenantId = req.params.id;
 
     // UUID 형식 검증
-    if (!tenantId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+    if (!tenantId || !tenantId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
       return next(new ApiError(400, 'Invalid tenant ID format'));
     }
 

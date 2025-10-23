@@ -212,7 +212,7 @@ export class WorkspaceConfigurationService {
             configValue: config.configValue,
             environment,
             updatedBy,
-            changeReason
+            changeReason: changeReason || 'Bulk configuration update'
           }
         );
 

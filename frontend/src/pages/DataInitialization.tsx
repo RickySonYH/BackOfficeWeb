@@ -100,11 +100,15 @@ const DataInitialization: React.FC = () => {
   const loadAllLogs = useCallback(async () => {
     try {
       const response = await dataInitService.getLogs(1, 100);
-      if (response.success) {
+      if (response.success && Array.isArray(response.data)) {
         setAllLogs(response.data);
+      } else {
+        console.warn('Invalid logs response format:', response);
+        setAllLogs([]);
       }
     } catch (error) {
       console.error('Failed to load logs:', error);
+      setAllLogs([]);
     }
   }, []);
 
@@ -211,7 +215,7 @@ const DataInitialization: React.FC = () => {
   };
 
   // 필터링된 로그
-  const filteredAllLogs = allLogs.filter(log => 
+  const filteredAllLogs = (Array.isArray(allLogs) ? allLogs : []).filter(log => 
     logFilter === 'all' || log.status === logFilter
   );
 

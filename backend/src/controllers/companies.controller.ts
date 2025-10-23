@@ -374,7 +374,7 @@ const validateCompanyWithSetupData = (data: CreateCompanyWithSetupRequest): Vali
     name: data.name,
     businessNumber: data.businessNumber,
     contractDate: data.contractDate,
-    status: data.status
+    status: data.status as CompanyStatus
   });
   errors.push(...companyErrors);
 
